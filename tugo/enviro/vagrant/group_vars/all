@@ -1,0 +1,4 @@
+---
+tugoweb_server_name: www-vagrant.tugoapp.com
+gbeURL: 'https://api-vagrant-{iso2}.tugoapp.com'
+latest: tugo-webapp-0.2.123-b0af79b.noarch.rpm

@@ -1,0 +1,7 @@
+---
+- hosts: webclient
+  remote_user: vagrant
+  sudo: yes
+  roles:
+    - webclient   
+    
