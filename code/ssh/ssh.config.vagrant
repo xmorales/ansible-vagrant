@@ -1,0 +1,7 @@
+Host *.vagrant.dev
+    ServerAliveInternal    60
+    TCPKeepAlive           yes
+    User                   vagrant
+    IdentityFile           ~/.ssh/id_rsa
+    ControlMaster          auto
+    ControlPath            ~/.ssh/mux-%r@%h:%p

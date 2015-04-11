@@ -1,0 +1,13 @@
+---
+- hosts: all
+  remote_user: vagrant
+  gather_facts: no
+  sudo: yes
+  tasks:
+    - name: copy ssh pub key
+      authorized_key: user={{ user }}
+                      key="{{ lookup('file', item) }}"
+                      state=present
+                      manage_dir=yes
+      with_fileglob:
+        - "{{ pub_file }}"
