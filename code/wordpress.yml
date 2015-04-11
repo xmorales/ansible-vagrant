@@ -1,0 +1,19 @@
+---
+- hosts: db
+  remote_user: vagrant
+  sudo: yes
+  gather_facts: no
+  vars_files:
+    - vars/wp.yml
+  roles:
+    - mysql
+
+- hosts: web
+  remote_user: vagrant
+  sudo: yes
+  gather_facts: no
+  vars_files:
+    - vars/certs.yml
+    - vars/wp.yml
+  roles:
+    - wordpress
