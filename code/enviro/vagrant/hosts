@@ -1,0 +1,11 @@
+[web]
+webserver1.vagrant.dev
+
+[db]
+database1.vagrant.dev
+
+[proxy]
+proxy1.vagrant.dev
+
+[repo]
+repo1.vagrant.dev
