@@ -1,5 +1,5 @@
 ---
-server_name: 'ansible.vagrant.dev'
+server_name: 'wordpress.vagrant.dev'
 ssl_certificate: 'vagrant.crt'
 ssl_certificate_key: 'vagrant.key'
 log_folder: '/var/log/nginx/proxy'
