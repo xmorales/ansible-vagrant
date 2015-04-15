@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-yum install -y libselinux-python
-
+yum install -y libselinux-python --nogpgcheck

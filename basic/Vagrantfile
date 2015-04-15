@@ -15,7 +15,7 @@ config.vm.box = "chef/centos-6.5"
 config.vm.provision :shell, path: "libselinux.sh"
 
 config.vm.provision "ansible" do |ansible|
-  ansible.playbook = "/Volumes/500GB/TID/repos/pdihub/ansible/code/tools/pubkeys.yml"
+  ansible.playbook = "code/tools/pubkeys.yml"
 end
 
 # 256MB RAM for all instances
@@ -38,10 +38,5 @@ end
     proxy.vm.hostname = "proxy1.vagrant.dev"
     proxy.vm.network "forwarded_port", guest: 443, host: 4443, auto_correct: true
     proxy.vm.network "private_network", ip: "172.16.1.120"
-  end
-   config.vm.define "repo" do |repo|
-    repo.vm.hostname = "repo1.vagrant.dev"
-    repo.vm.network "forwarded_port", guest: 8080, host: 8181, auto_correct: true
-    repo.vm.network "private_network", ip: "172.16.1.130"
   end
 end
