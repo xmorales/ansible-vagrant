@@ -31,7 +31,7 @@ LogLevel ERROR
 
 # References:
 
-* [https://github.com/phinze/landrush](Vagrant DNS plugin)
+* [Vagrant DNS plugin](https://github.com/phinze/landrush)
 * [Sublime Text 2/3 Ansible Language Pack](https://github.com/clifford-github/sublime-ansible)
 * [Ansible Examples](https://github.com/ansible/ansible-examples)
 * [Apache Rewrite Rules](http://thornelabs.net/2014/06/02/manage-apache-virtualhosts-and-mod-rewrite-rules-with-ansible.html)
