@@ -16,6 +16,9 @@ config.vm.provision :shell, path: "libselinux.sh"
 
 config.vm.provision "ansible" do |ansible|
   ansible.playbook = "code/tools/pubkeys.yml"
+  ansible.extra_vars = { pub_file: '~/.ssh/id_rsa.pub',
+                         user: 'vagrant'
+                       }
 end
 
 # 256MB RAM for all instances
