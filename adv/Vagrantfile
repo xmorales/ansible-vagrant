@@ -43,10 +43,6 @@ config.vm.graceful_halt_timeout = 10
 config.vm.box = "chef/centos-6.5"
 config.vm.provision :shell, path: "libselinux.sh"
 
-config.vm.provision "ansible" do |ansible|
-  ansible.playbook = "code/tools/pubkeys.yml"
-end
-
 # 256MB RAM for all instances
 config.vm.provider "virtualbox" do |vb|
   vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
@@ -63,6 +59,7 @@ end
     groups["all"].push(opts[:name])
   end
 
+  # setting up instance parameters
   instances.each_with_index do | opts, index |
     config.vm.define(opts[:name]) do |config|
        config.vm.hostname = "%s" % [ opts[:name].to_s ]
@@ -71,7 +68,7 @@ end
          config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
        end if opts[:forwards]
 
-       # configure with ansible only on the last box for the all the hosts at once
+       # This will run at the end of provisioning but it'll apply for all hosts at once
        if index == instances.size - 1
          config.vm.provision :ansible do |ansible|
            ansible.verbose = "vvvv"
