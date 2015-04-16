@@ -1,62 +1,82 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$boxes = [
+# based on:
+# http://tjheeta.github.io/2014/12/01/ansible-vagrant-multiple-nodes.html
+
+instances = [
   {
-    :name => :master,
-    :group => "master"
-    :forwards => { 80 => 1080, 443 => 1443 }
+    :name => :proxy1,
+    :group => "proxy",
+    :forwards => { 443 => 4443 },
+    :ip => "172.16.1.120"
   },
   {
-    :name => :worker1,
-    :group => "worker",
+    :name => :proxy2,
+    :group => "proxy",
+    :forwards => { 443 => 4444 },
+    :ip => "172.16.1.121"
   },
   {
-    :name => :worker2,
-    :group => "worker",
+    :name => :webserver1,
+    :group => "web",
+    :forwards => { 80 => 8080 },
+    :ip => "172.16.1.100"
+  },
+  {
+    :name => :webserver2,
+    :group => "web",
+    :forwards => { 80 => 8081 },
+    :ip => "172.16.1.101"
   }
 ]
-lxc_snapshot_suffix = "none"
 
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  # haven't tested virtualbox, but these settings are most likely correct
-  #config.vm.provider :virtualbox do |vb, override|
-  #  override.vm.box = "trusty64"
-  #  override.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
-  #end
+config.ssh.forward_agent = true
+config.landrush.enabled = "true"
+config.vm.boot_timeout = 90
+config.vm.graceful_halt_timeout = 10
 
-  config.vm.provider :lxc do |lxc, override|
-    override.vm.box = "trusty64-lxc"
-    override.vm.box_url = "https://vagrantcloud.com/fgrehm/boxes/trusty64-lxc/versions/2/providers/lxc.box"
-    lxc.backingstore = "btrfs"
-    lxc.snapshot_suffix = lxc_snapshot_suffix
-  end
-  $groups = { "all" => [] }
-  $boxes.each do | opts |
-    if ! $groups.has_key?(opts[:group])
-      $groups[opts[:group]] = [ opts[:name] ]
+config.vm.box = "chef/centos-6.5"
+config.vm.provision :shell, path: "libselinux.sh"
+
+config.vm.provision "ansible" do |ansible|
+  ansible.playbook = "code/tools/pubkeys.yml"
+end
+
+# 256MB RAM for all instances
+config.vm.provider "virtualbox" do |vb|
+  vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+  vb.customize ["modifyvm", :id, "--memory", "256"]
+end
+  # Creates "group" array with default and other groups
+  groups = { "all" => [] }
+  instances.each do | opts |
+    if ! groups.has_key?(opts[:group])
+      groups[opts[:group]] = [ opts[:name] ]
     else
-      $groups[opts[:group]].push(opts[:name])
+      groups[opts[:group]].push(opts[:name])
     end
-    $groups["all"].push(opts[:name])
+    groups["all"].push(opts[:name])
   end
 
-  $boxes.each_with_index do | opts, index |
-     config.vm.define(opts[:name]) do |config|
-       config.vm.hostname =   "%s" % [ opts[:name].to_s ]
+  instances.each_with_index do | opts, index |
+    config.vm.define(opts[:name]) do |config|
+       config.vm.hostname = "%s" % [ opts[:name].to_s ]
+       config.vm.network :private_network, ip: opts[:ip].to_s
        opts[:forwards].each do |guest_port,host_port|
-         config.vm.network :forwarded_port, guest: guest_port, host: host_port
+         config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
        end if opts[:forwards]
 
        # configure with ansible only on the last box for the all the hosts at once
-       if index == $boxes.size - 1
+       if index == instances.size - 1
          config.vm.provision :ansible do |ansible|
-           #ansible.verbose = "vvvv"
-           ansible.playbook = "ansible/playbook.yml"
-           ansible.groups = $groups
+           ansible.verbose = "vvvv"
+           ansible.playbook = "code/tools/pubkeys.yml"
+           ansible.groups = groups
            ansible.sudo = true
            ansible.limit = "all"
            ansible.extra_vars = { ansible_ssh_user: 'vagrant' }
