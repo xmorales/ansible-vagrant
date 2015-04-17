@@ -9,27 +9,27 @@ hosts = [
     :name => :proxy1,
     :group => "proxy",
     :forwards => { 443 => 4443 },
-    :ip => "172.16.1.120",
-    :disk => "./tmp/extra_disk1.vdi"
+    :ip => "172.16.1.120"
   },
   {
     :name => :proxy2,
     :group => "proxy",
     :forwards => { 443 => 4444 },
-    :ip => "172.16.1.121",
-    :disk => "./tmp/extra_disk2.vdi"
+    :ip => "172.16.1.121"
   },
   {
     :name => :webserver1,
     :group => "web",
     :forwards => { 80 => 8080 },
-    :ip => "172.16.1.100"
+    :ip => "172.16.1.100",
+    :disk => "./tmp/extra_disk1.vdi"
   },
   {
     :name => :webserver2,
     :group => "web",
     :forwards => { 80 => 8081 },
-    :ip => "172.16.1.101"
+    :ip => "172.16.1.101",
+    :disk => "./tmp/extra_disk2.vdi"
   }
 ]
 
@@ -62,8 +62,6 @@ end
     groups["all"].push(opts[:name])
   end
 
-  # config.vm.provision :shell, inline: "cp .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory code/enviro/vagrant/hosts"
-
   # setting up instance parameters
   hosts.each_with_index do | opts, index |
     config.vm.define(opts[:name]) do |config|
@@ -74,11 +72,11 @@ end
          config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
        end if opts[:forwards]
        config.vm.provider :virtualbox do |vb|
-          unless File.exist?(opts[:disk].to_s)
-          vb.customize ['createhd', '--filename', opts[:disk].to_s, '--size', 500]
-          vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk].to_s]
+          unless [opts[:group] = "web"] || File.exist?(opts[:disk].to_s)
+            vb.customize ['createhd', '--filename', opts[:disk].to_s, '--size', 500]
+            vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk].to_s]
           end
-          config.vm.provision :ansible do |ansible|
+           config.vm.provision :ansible do |ansible|
            # ansible.verbose = "vvvv"
            ansible.playbook = "code/tools/pubkeys.yml"
            ansible.groups = groups

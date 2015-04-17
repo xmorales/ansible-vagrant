@@ -4,8 +4,18 @@
   sudo: yes
   gather_facts: no
   vars_files:
-    - vars/certs.yml
-    - vars/proxy.yml
+  	- vars/certs.yml
+  	- vars/proxy.yml
+  roles:
+  	- nginx
+
+- hosts: webservers
+  remote_user: vagrant
+  sudo: yes
+  gather_facts: no
+  vars_files:
+    - vars/gluster.yml
   roles:
     - ha
-    - nginx
+
+

@@ -17,14 +17,17 @@
   tags: filesystem
 
 - name: Ensure brick directory exists
-  file: path=/srv/sdb1/brick
+  file: path={{ item }}
         state=directory
+  with_items:
+    - "{{ gluster_brick_dir }}"
+    - "{{ gluster_mount_dir }}"
   tags: filesystem
 
 - name: Copy gluster gluster repo
   copy: src=gluster.repo
         dest=/etc/yum.repos.d/
-  tags: deployment
+  tags: [deployment, gluterfs]
 
 - name: Install GlusterFS
   yum: name={{ item }}
@@ -35,4 +38,36 @@
     - glusterfs-server
     - glusterfs-fuse
     - glusterfs-geo-replication
-  tags: deployment
+  tags: [deployment, glusterfs]
+
+- name: Connect to peers
+  command: gluster peer probe {{ item }}
+  register: gluster_probe_result
+  changed_when: "'already in peer list' not in gluster_probe_result.stdout"
+  with_items: groups['proxy']
+  tags: glusterfs
+
+- name: Configure gluster volume
+  gluster_volume: state=present
+                  name="{{ gluster_brick_name }}"
+                  replica=2
+                  brick="{{ gluster_brick_dir }}"
+                  rebalance=yes
+                  cluster={{ item }}
+  with_items: groups['proxy']
+  run_once: true
+  ignore_errors: yes
+  notify: start glusterfs
+  tags: glusterfs
+
+# - name: Start gluster volume
+#   gluster_volume: state=started
+#                   name=extra_disk
+#   tags: glusterfs
+
+# - name: Mount GlusterFS volume
+#   mount: fstype=glusterfs
+#          src={{ ansible_host }}
+
+
+
