@@ -1,0 +1,11 @@
+---
+- hosts: proxy
+  remote_user: vagrant
+  sudo: yes
+  gather_facts: no
+  vars_files:
+    - vars/certs.yml
+    - vars/proxy.yml
+  roles:
+    - ha
+    - nginx
