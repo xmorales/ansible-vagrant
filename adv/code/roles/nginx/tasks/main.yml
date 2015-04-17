@@ -1,0 +1,62 @@
+---
+- name: Place nginx repo
+  copy: src=nginx.repo
+        dest=/etc/yum.repos.d/
+  tags: base
+
+- name: Install Nginx
+  yum: name=nginx
+      state=present
+      disablerepo=*
+      enablerepo=nginx
+      update_cache=yes
+  tags: deployment
+
+- name: Make sure ssl folder exists
+  file: path=/etc/nginx/ssl/
+      state=directory
+      recurse=yes
+      owner=nginx
+      group=nginx
+  tags: configuration
+
+- name: Using shell to create log folder
+  shell: mkdir -p "{{ log_folder }}"
+  tags: configuration
+
+- name: Remove default config
+  file: path=/etc/nginx/conf.d/{{ item }}
+        state=absent
+  with_items:
+    - default.conf
+    - default_ssl.conf
+  tags: configuration
+
+- name: Copy certificates
+  copy: content="{{ certs[item] }}"
+        dest=/etc/nginx/ssl/{{ item }}
+        group=nginx
+        owner=nginx
+  with_items:
+    - vagrant.key
+    - vagrant.crt
+  tags: configuration
+
+- name: Copy main config
+  template: src={{ item }}
+            dest=/etc/nginx/
+  with_items:
+    - nginx.conf
+  tags: configuration
+
+- name: Copy virtualhost template
+  template: src={{ item }}
+            dest=/etc/nginx/conf.d/
+  with_items:
+    - vagrant-proxy.conf
+    - vg-upstream.conf
+  notify: reload nginx
+  tags: configuration
+
+
+

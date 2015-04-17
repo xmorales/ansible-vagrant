@@ -1,0 +1,38 @@
+---
+## Before attempting to create FS you must create a partition table on the new disk.
+## You can use fdisk, cfisk, sfdisk..
+- name: Create ext4 filesystem
+  filesystem: fstype=ext4
+              dev=/dev/sdb1
+              opts="-cc"
+              force=yes
+  tags: filesystem
+
+- name: Mount filesystem
+  mount: name=/srv/sdb1
+         src=/dev/sdb1
+         fstype=ext4
+         state=present
+         opts="defaults"
+  tags: filesystem
+
+- name: Ensure brick directory exists
+  file: path=/srv/sdb1/brick
+        state=directory
+  tags: filesystem
+
+- name: Copy gluster gluster repo
+  copy: src=gluster.repo
+        dest=/etc/yum.repos.d/
+  tags: deployment
+
+- name: Install GlusterFS
+  yum: name={{ item }}
+       state=present
+       update_cache=yes
+  with_items:
+    - glusterfs
+    - glusterfs-server
+    - glusterfs-fuse
+    - glusterfs-geo-replication
+  tags: deployment

@@ -62,6 +62,8 @@ end
     groups["all"].push(opts[:name])
   end
 
+  # config.vm.provision :shell, inline: "cp .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory code/enviro/vagrant/hosts"
+
   # setting up instance parameters
   hosts.each_with_index do | opts, index |
     config.vm.define(opts[:name]) do |config|
