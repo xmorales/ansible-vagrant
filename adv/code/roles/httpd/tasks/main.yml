@@ -1,0 +1,28 @@
+---
+- name: Mount GlusterFS volume
+  mount: fstype=glusterfs
+         name={{ gluster_mount_dir }}
+         state=mounted
+         src={{ primary_gluster_node }}:/{{ gluster_vol_name}}
+         opts="defaults,_netdev"
+  register: mount_result
+  when: inventory_hostname == groups.web[1] or inventory_hostname == groups.web[2] or inventory_hostname == groups.web[3]
+  tags: deployment
+
+- name: Install httpd
+  yum: name=httpd
+       state=present
+       update_cache=yes
+  tags: deployment
+
+- name: Copy index html
+  template: src=index.html
+            dest={{ gluster_mount_dir }}
+  tags: configuration
+
+- name: Copy server-status virtualhost
+  template: src=monitor.conf
+            dest=/etc/httpd/conf.d/
+  notify: reload httpd
+  tags: configuration
+

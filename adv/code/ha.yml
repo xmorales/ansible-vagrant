@@ -16,6 +16,7 @@
   vars_files:
     - vars/gluster.yml
   roles:
-    - ha
+    - glusterfs
+    - httpd
 
 

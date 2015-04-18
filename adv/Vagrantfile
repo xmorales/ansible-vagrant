@@ -29,9 +29,26 @@ hosts = [
   {
     :name => :webserver2,
     :group => "web",
+    # :second_group => "slave",
     :forwards => { 80 => 8081 },
     :ip => "172.16.1.101",
     :disk => "./tmp/extra_disk2.vdi"
+  },
+  {
+    :name => :webserver3,
+    :group => "web",
+    # :second_group => "slave",
+    :forwards => { 80 => 8081 },
+    :ip => "172.16.1.103",
+    :disk => "./tmp/extra_disk3.vdi"
+  },
+    {
+    :name => :webserver4,
+    :group => "web",
+    # :second_group => "slave",
+    :forwards => { 80 => 8081 },
+    :ip => "172.16.1.104",
+    :disk => "./tmp/extra_disk4.vdi"
   }
 ]
 
@@ -74,10 +91,12 @@ end
          config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
        end if opts[:forwards]
        config.vm.provider :virtualbox do |vb|
+        if (opts[:group].to_s) == "web"
           unless File.exist?(opts[:disk].to_s)
             vb.customize ['createhd', '--filename', opts[:disk].to_s, '--size', 500]
             vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk].to_s]
           end
+        end
            config.vm.provision :ansible do |ansible|
            # ansible.verbose = "vvvv"
            ansible.playbook = "code/tools/pubkeys.yml"
