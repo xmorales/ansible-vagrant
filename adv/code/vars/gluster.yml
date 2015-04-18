@@ -1,5 +1,5 @@
 ---
 gluster_mount_dir: '/mnt/gluster'
 gluster_brick_dir: '/srv/sdb1/brick'
-gluster_brick_name: gluster
-gluster_brick_config: "{{ groups.webservers[0] }}:{{ gluster_brick_dir }}"
+gluster_vol_name: glustervol
+gluster_cluster: '172.16.1.100,172.16.1.101'

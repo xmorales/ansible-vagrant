@@ -4,6 +4,8 @@
 # based on:
 # http://tjheeta.github.io/2014/12/01/ansible-vagrant-multiple-nodes.html
 
+domain = ".vagrant.dev"
+
 hosts = [
   {
     :name => :proxy1,
@@ -72,7 +74,7 @@ end
          config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
        end if opts[:forwards]
        config.vm.provider :virtualbox do |vb|
-          unless [opts[:group] = "web"] || File.exist?(opts[:disk].to_s)
+          unless File.exist?(opts[:disk].to_s)
             vb.customize ['createhd', '--filename', opts[:disk].to_s, '--size', 500]
             vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk].to_s]
           end
