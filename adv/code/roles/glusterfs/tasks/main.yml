@@ -37,7 +37,7 @@
     - glusterfs
     - glusterfs-server
     - glusterfs-fuse
-  notify: restart gluster
+  notify: start gluster
   tags: [deployment, glusterfs]
 
 - name: Check if Gluster volumes already exist
@@ -48,11 +48,13 @@
 
 - name: Connect peers
   command: gluster peer probe {{ item }}
-  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
+  #when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
   register: gluster_probe_result
   changed_when: "'already in peer list' not in gluster_probe_result.stdout"
   with_items:
     - "{{ hostvars[groups['web'][1]]['ansible_eth1']['ipv4']['address'] }}"
+    - "{{ hostvars[groups['web'][2]]['ansible_eth1']['ipv4']['address'] }}"
+    - "{{ hostvars[groups['web'][3]]['ansible_eth1']['ipv4']['address'] }}"
   run_once: true
   tags: glusterfs
 
@@ -65,17 +67,10 @@
                   cluster="{{ gluster_cluster }}"
                   force=true
 
-  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
+  #when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
   run_once: true
   ignore_errors: yes
   tags: glusterfs
-
-# - name: Mount GlusterFS volume
-#   mount: fstype=glusterfs
-#          name={{ gluster_mount_dir }}
-#          state=mounted
-#          src={{ primary_gfs_server }}
-#          opts="defaults,_netdev"
 
 
 
