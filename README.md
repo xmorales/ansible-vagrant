@@ -29,10 +29,22 @@ LogLevel ERROR
 ```
 `$ vagrant up`
 
+
+# Techdebt
+
+- [ ] Boot machines without disk
+- [ ] dynamic inventory
+- [ ] glusterfs run tasks on one node only
+- [X] glusterfs manual installation
+- [ ] nginx cluster
+- [ ] mysql cluster
+
+
 # References:
 
 * [Vagrant DNS plugin](https://github.com/phinze/landrush)
 * [Sublime Text 2/3 Ansible Language Pack](https://github.com/clifford-github/sublime-ansible)
 * [Ansible Examples](https://github.com/ansible/ansible-examples)
+* [Ansible modules extra](https://github.com/ansible/ansible-modules-extras)
 * [Apache Rewrite Rules](http://thornelabs.net/2014/06/02/manage-apache-virtualhosts-and-mod-rewrite-rules-with-ansible.html)
 * [Jinja2 Template Examples](https://servercheck.in/blog/apache-virtualhosts-with-ansible-and-jinja2)

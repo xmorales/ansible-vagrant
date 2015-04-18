@@ -12,7 +12,7 @@
   mount: name=/srv/sdb1
          src=/dev/sdb1
          fstype=ext4
-         state=present
+         state=mounted
          opts="defaults"
   tags: filesystem
 
@@ -37,37 +37,45 @@
     - glusterfs
     - glusterfs-server
     - glusterfs-fuse
-    - glusterfs-geo-replication
+  notify: restart gluster
   tags: [deployment, glusterfs]
 
-- name: Connect to peers
+- name: Check if Gluster volumes already exist
+  shell: "gluster volume info"
+  changed_when: false
+  register: gluster_volume_info
+  tags: glusterfs
+
+- name: Connect peers
   command: gluster peer probe {{ item }}
+  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
   register: gluster_probe_result
   changed_when: "'already in peer list' not in gluster_probe_result.stdout"
-  with_items: groups['proxy']
+  with_items:
+    - "{{ hostvars[groups['web'][1]]['ansible_eth1']['ipv4']['address'] }}"
+  run_once: true
   tags: glusterfs
 
-- name: Configure gluster volume
-  gluster_volume: state=present
-                  name="{{ gluster_brick_name }}"
-                  replica=2
-                  brick="{{ gluster_brick_dir }}"
+- name: Create and start gluster volume
+  gluster_volume: state=started
+                  name="{{ gluster_vol_name }}"
+                  replicas=2
+                  brick="{{gluster_brick_dir }}"
                   rebalance=yes
-                  cluster={{ item }}
-  with_items: groups['proxy']
+                  cluster="{{ gluster_cluster }}"
+                  force=true
+
+  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
   run_once: true
   ignore_errors: yes
-  notify: start glusterfs
   tags: glusterfs
-
-# - name: Start gluster volume
-#   gluster_volume: state=started
-#                   name=extra_disk
-#   tags: glusterfs
 
 # - name: Mount GlusterFS volume
 #   mount: fstype=glusterfs
-#          src={{ ansible_host }}
+#          name={{ gluster_mount_dir }}
+#          state=mounted
+#          src={{ primary_gfs_server }}
+#          opts="defaults,_netdev"
 
 
 
