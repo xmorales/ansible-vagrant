@@ -28,27 +28,10 @@ hosts = [
   },
   {
     :name => :webserver2,
-    :group => "web",
-    # :second_group => "slave",
+    :group => [ "web", "gluster_slaves" ],
     :forwards => { 80 => 8081 },
     :ip => "172.16.1.101",
     :disk => "./tmp/extra_disk2.vdi"
-  },
-  {
-    :name => :webserver3,
-    :group => "web",
-    # :second_group => "slave",
-    :forwards => { 80 => 8081 },
-    :ip => "172.16.1.103",
-    :disk => "./tmp/extra_disk3.vdi"
-  },
-    {
-    :name => :webserver4,
-    :group => "web",
-    # :second_group => "slave",
-    :forwards => { 80 => 8081 },
-    :ip => "172.16.1.104",
-    :disk => "./tmp/extra_disk4.vdi"
   }
 ]
 
@@ -71,15 +54,26 @@ config.vm.provider "virtualbox" do |vb|
 end
 
   # Creates "group" array with default and other groups for Ansible inventory
-  groups = { "all" => [] }
+  inventory = { "all" => [] }
   hosts.each do | opts |
-    if ! groups.has_key?(opts[:group])
-      groups[opts[:group]] = [ opts[:name] ]
+  if ! opts[:group].kind_of?(Array)
+    if ! inventory.has_key?(opts[:group])
+      inventory[opts[:group]] = [ opts[:name] ]
     else
-      groups[opts[:group]].push(opts[:name])
+      inventory[opts[:group]].push(opts[:name])
     end
-    groups["all"].push(opts[:name])
+      inventory["all"].push(opts[:name])
+  else
+    opts[:group].each do | groups |
+    inventory["all"].push(opts[:name]) unless inventory["all"].include?(opts[:name])
+    if ! inventory.has_key?(groups)
+      inventory[groups] = [ opts[:name] ]
+    else
+    inventory[groups].push(opts[:name])
+    end
   end
+end
+end
 
   # setting up instance parameters
   hosts.each_with_index do | opts, index |
@@ -99,9 +93,9 @@ end
         end
            config.vm.provision :ansible do |ansible|
            # ansible.verbose = "vvvv"
-           ansible.playbook = "code/tools/pubkeys.yml"
-           ansible.groups = groups
-           ansible.sudo = true
+           ansible.playbook       = "code/tools/pubkeys.yml"
+           ansible.groups         = inventory
+           ansible.sudo           = true
            ansible.extra_vars = { ansible_ssh_user: 'vagrant',
                                   pub_file: '~/.ssh/id_rsa.pub',
                                   user: 'vagrant'
