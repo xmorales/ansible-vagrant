@@ -85,7 +85,8 @@ end
          config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
        end if opts[:forwards]
        config.vm.provider :virtualbox do |vb|
-        if (opts[:group].to_s) == "web"
+        # if opts[:group].to_s) == "web"
+        if opts.has_key?("disk")
           unless File.exist?(opts[:disk].to_s)
             vb.customize ['createhd', '--filename', opts[:disk].to_s, '--size', 500]
             vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk].to_s]
