@@ -3,6 +3,9 @@ Ansible + Vagrant
 
 Basic and Advanced examples using Ansible and Vagrant.
 
+# Audience
+This project aims education as fundamental with a nonprofit goal. If you'd like to learn how Ansible fits with Vagrant you might find useful code in here.
+
 # Requirements
 Tested with:
 * Vagrant 1.7.2
@@ -32,10 +35,12 @@ LogLevel ERROR
 
 # Techdebt
 
-- [X] Boot machines without disk
+- [X] provision machines without disk
+- [ ] inventory in json dump
 - [X] dynamic inventory
-- [ ] glusterfs run tasks on one node only
+- [X] glusterfs run tasks on one node only
 - [X] glusterfs manual installation
+- [ ] glusterfs peer run only on slaves
 - [ ] httpd cluster
 - [ ] mysql cluster
 
