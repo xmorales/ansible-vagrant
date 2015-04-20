@@ -32,11 +32,11 @@ LogLevel ERROR
 
 # Techdebt
 
-- [ ] Boot machines without disk
-- [ ] dynamic inventory
+- [X] Boot machines without disk
+- [X] dynamic inventory
 - [ ] glusterfs run tasks on one node only
 - [X] glusterfs manual installation
-- [ ] nginx cluster
+- [ ] httpd cluster
 - [ ] mysql cluster
 
 
