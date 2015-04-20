@@ -14,7 +14,7 @@ Tested with:
 
 # Setting up your working tree
 ```
-$ git clone git@pdihub.hi.inet:oriolf/ansible.git
+$ git clone https://github.com/wefner/ansible-vagrant.git
 $ vagrant plugin install landrush
 $ vagrant box add chef/centos-6.5 --provider virtualbox
 ```
