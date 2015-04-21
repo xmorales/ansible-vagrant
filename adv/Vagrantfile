@@ -53,7 +53,7 @@ config.vm.provider "virtualbox" do |vb|
   vb.customize ["modifyvm", :id, "--memory", "256"]
 end
 
-  # Creates "group" array with default and other groups for Ansible inventory
+  # Creates "inventory" Hash including "all" group
   inventory = { "all" => [] }
   hosts.each do | opts |
   if ! opts[:group].kind_of?(Array)
@@ -76,31 +76,31 @@ end
 end
 
   # setting up instance parameters
-  hosts.each_with_index do | opts, index |
-    config.vm.define(opts[:name]) do |config|
-       config.vm.synced_folder ".", "/vagrant", disabled: true
-       config.vm.hostname = "%s" % [ opts[:name].to_s ]
-       config.vm.network :private_network, ip: opts[:ip].to_s
-       opts[:forwards].each do |guest_port,host_port|
-         config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
-       end if opts[:forwards]
-       config.vm.provider :virtualbox do |vb|
-        # if opts[:group].to_s) == "web"
-        if opts.has_key?("disk")
-          unless File.exist?(opts[:disk].to_s)
-            vb.customize ['createhd', '--filename', opts[:disk].to_s, '--size', 500]
-            vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk].to_s]
-          end
-        end
-           config.vm.provision :ansible do |ansible|
-           # ansible.verbose = "vvvv"
-           ansible.playbook       = "code/tools/pubkeys.yml"
-           ansible.groups         = inventory
-           ansible.sudo           = true
-           ansible.extra_vars = { ansible_ssh_user: 'vagrant',
-                                  pub_file: '~/.ssh/id_rsa.pub',
-                                  user: 'vagrant'
-                                 }
+hosts.each_with_index do | opts, index |
+  config.vm.define(opts[:name]) do |config|
+   config.vm.synced_folder ".", "/vagrant", disabled: true
+   config.vm.hostname = "%s" % [ opts[:name].to_s ]
+   config.vm.network :private_network, ip: opts[:ip].to_s
+   opts[:forwards].each do |guest_port,host_port|
+     config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
+   end if opts[:forwards]
+   config.vm.provider :virtualbox do |vb|
+    # create disk if in Hash
+    if opts.has_key?("disk")
+      unless File.exist?(opts[:disk].to_s)
+        vb.customize ['createhd', '--filename', opts[:disk].to_s, '--size', 500]
+        vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk].to_s]
+      end
+    end
+   config.vm.provision :ansible do |ansible|
+   # ansible.verbose = "vvvv"
+   ansible.playbook       = "code/tools/pubkeys.yml"
+   ansible.groups         = inventory
+   ansible.sudo           = true
+   ansible.extra_vars = { ansible_ssh_user: 'vagrant',
+                          pub_file: '~/.ssh/id_rsa.pub',
+                          user: 'vagrant'
+                         }
          end
       end
     end
