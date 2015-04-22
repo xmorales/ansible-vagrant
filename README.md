@@ -180,9 +180,10 @@ Handler usage in `code/roles/httpd/tasks/main.yml`
 - [X] dynamic inventory
 - [X] glusterfs run tasks on one node only
 - [X] glusterfs manual installation
-- [ ] glusterfs peer run only on slaves
+- [X] glusterfs peer run only on slaves
 - [ ] httpd cluster
 - [ ] mysql cluster
+- [ ] fdisk extra_disk automatically
 
 
 # References:

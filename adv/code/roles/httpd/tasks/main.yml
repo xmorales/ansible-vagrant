@@ -3,10 +3,10 @@
   mount: fstype=glusterfs
          name={{ gluster_mount_dir }}
          state=mounted
-         src={{ primary_gluster_node }}:/{{ gluster_vol_name}}
+         src={{ groups['web'][0] }}:/{{ gluster_vol_name}}
          opts="defaults,_netdev"
   register: mount_result
-  when: inventory_hostname == groups.web[1] or inventory_hostname == groups.web[2] or inventory_hostname == groups.web[3]
+  when: groups['gluster_slaves'] and "'remount' not in mount_result.stdout"
   tags: deployment
 
 - name: Install httpd
