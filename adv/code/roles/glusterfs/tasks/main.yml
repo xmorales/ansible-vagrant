@@ -70,6 +70,7 @@
       {%- endfor %}
   run_once: true
   register: cluster_nodes_result
+  tags: glusterfs
 
 - name: Set hosts list as fact
   set_fact: cluster_nodes="{{ cluster_nodes_result.msg }}"
@@ -77,11 +78,12 @@
 - name: Create and start gluster volume
   gluster_volume: state=present
                   name="{{ gluster_vol_name }}"
-                  replicas=2
+                  replicas={{ item }}
                   brick="{{gluster_brick_dir }}"
-                  rebalance=yes
                   cluster="{{ cluster_nodes }}"
                   force=true
+  with_items:
+    - "{{ [groups['gluster_slaves']] | length }}"
   when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
   run_once: true
   ignore_errors: yes
