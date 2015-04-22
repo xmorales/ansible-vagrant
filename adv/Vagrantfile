@@ -32,6 +32,13 @@ hosts = [
     :forwards => { 80 => 8081 },
     :ip => "172.16.1.101",
     :disk => "./tmp/extra_disk2.vdi"
+  },
+  {
+    :name => :webserver3,
+    :group => [ "web", "gluster_slaves" ],
+    :forwards => { 80 => 8081 },
+    :ip => "172.16.1.102",
+    :disk => "./tmp/extra_disk3.vdi"
   }
 ]
 

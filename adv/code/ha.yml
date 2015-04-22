@@ -1,4 +1,11 @@
 ---
+- hosts: all
+  remote_user: vagrant
+  sudo: yes
+  gather_facts: yes
+  roles:
+    - base
+
 - hosts: proxy
   remote_user: vagrant
   sudo: yes
@@ -18,5 +25,8 @@
   roles:
     - glusterfs
     - httpd
+
+
+
 
 

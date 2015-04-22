@@ -37,37 +37,52 @@
     - glusterfs
     - glusterfs-server
     - glusterfs-fuse
-  notify: start gluster
+  tags: [deployment, glusterfs]
+
+- name: Ensure Gluster is running
+  service: name=glusterd
+           state=started
+           enabled=yes
   tags: [deployment, glusterfs]
 
 - name: Check if Gluster volumes already exist
   shell: "gluster volume info"
-  changed_when: false
   register: gluster_volume_info
   tags: glusterfs
 
 - name: Connect peers
   command: gluster peer probe {{ item }}
-  #when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
+  with_items:
+    - "{{ [groups['gluster_slaves']][0] }}"
+  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
   register: gluster_probe_result
   changed_when: "'already in peer list' not in gluster_probe_result.stdout"
-  with_items:
-    - "{{ hostvars[groups['web'][1]]['ansible_eth1']['ipv4']['address'] }}"
-    - "{{ hostvars[groups['web'][2]]['ansible_eth1']['ipv4']['address'] }}"
-    - "{{ hostvars[groups['web'][3]]['ansible_eth1']['ipv4']['address'] }}"
   run_once: true
   tags: glusterfs
 
+  # http://adamj.eu/tech/2014/10/02/merging-groups-and-hostvars-in-ansible-variables/
+- name: Get hosts lists by comma separated
+  debug:
+    msg: |
+      {% set comma = joiner(",") %}
+      {% for item in [groups['gluster_slaves']][0] -%}
+        {{ comma() }}{{ item }}
+      {%- endfor %}
+  run_once: true
+  register: cluster_nodes_result
+
+- name: Set hosts list as fact
+  set_fact: cluster_nodes="{{ cluster_nodes_result.msg }}"
+
 - name: Create and start gluster volume
-  gluster_volume: state=started
+  gluster_volume: state=present
                   name="{{ gluster_vol_name }}"
                   replicas=2
                   brick="{{gluster_brick_dir }}"
                   rebalance=yes
-                  cluster="{{ gluster_cluster }}"
+                  cluster="{{ cluster_nodes }}"
                   force=true
-
-  #when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
+  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
   run_once: true
   ignore_errors: yes
   tags: glusterfs
