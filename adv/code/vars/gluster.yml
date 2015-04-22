@@ -2,4 +2,3 @@
 gluster_mount_dir: '/mnt/gluster'
 gluster_brick_dir: '/srv/sdb1/brick'
 gluster_vol_name: glustervol
-primary_gluster_node: '172.16.1.100'
