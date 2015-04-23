@@ -1,0 +1,19 @@
+---
+httpd:
+  port: '80'
+  server_name: 'website.vagrant.dev'
+  log_folder: '/var/log/httpd/website'
+  server_name: '&proxy.server_name'
+
+proxy:
+  server_name: 'wordpress.vagrant.dev'
+  ssl_certificate: 'vagrant.crt'
+  ssl_certificate_key: 'vagrant.key'
+  log_folder: '/var/log/nginx/proxy'
+  upstream: 'webserver1.vagrant.dev'
+
+gluster:
+  mount_dir: '/mnt/gluster'
+  brick_dir: '/srv/sdb1/brick'
+  vol_name: glustervol
+

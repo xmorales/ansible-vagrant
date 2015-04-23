@@ -54,6 +54,10 @@ config.vm.graceful_halt_timeout = 10
 config.vm.box = "chef/centos-6.5"
 config.vm.provision :shell, path: "libselinux.sh"
 
+config.vm.provision :host_shell do | host_shell |
+  host_shell.inline = 'cp .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory code/enviro/vagrant/hosts'
+end
+
 # 256MB RAM for all hosts
 config.vm.provider "virtualbox" do |vb|
   vb.customize ["modifyvm", :id, "--nictype1", "virtio"]

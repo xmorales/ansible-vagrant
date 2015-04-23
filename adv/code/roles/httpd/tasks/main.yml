@@ -1,9 +1,9 @@
 ---
 - name: Mount GlusterFS volume
   mount: fstype=glusterfs
-         name={{ gluster_mount_dir }}
+         name={{ gluster.mount_dir }}
          state=mounted
-         src={{ groups['web'][0] }}:/{{ gluster_vol_name}}
+         src={{ groups['web'][0] }}:/{{ gluster.vol_name}}
          opts="defaults,_netdev"
   register: mount_result
   when: groups['gluster_slaves'] and "'remount' not in mount_result.stdout"
@@ -15,9 +15,22 @@
        update_cache=yes
   tags: deployment
 
+- name: Make sure httpd is running
+  service: name=httpd
+           state=started
+           enabled=yes
+  tags: deployment
+
 - name: Copy index html
   template: src=index.html
-            dest={{ gluster_mount_dir }}
+            dest={{ gluster.mount_dir }}
+  tags: configuration
+
+- name: Make sure log folder exists
+  file: path={{ httpd.log_folder }}
+        state=directory
+        owner=apache
+        group=apache
   tags: configuration
 
 - name: Copy server-status virtualhost
@@ -26,3 +39,10 @@
   notify: reload httpd
   tags: configuration
 
+- name: Copy http config file
+  template: src=httpd.conf
+            dest=/etc/httpd/conf/
+            owner=apache
+            group=apache
+  notify: reload httpd
+  tags: configuration
