@@ -42,13 +42,13 @@ hosts = [
   },
   {
     :name => :database1,
-    :group => [ "db" ],
+    :group => "db",
     :forwards => { 3306 => 3333 },
     :ip => "172.16.1.110"
   },
   {
     :name => :database2,
-    :group => [ "db" ],
+    :group => "db",
     :forwards => { 3306 => 3334 },
     :ip => "172.16.1.111"
   }
