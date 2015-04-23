@@ -189,6 +189,7 @@ Handler usage in `code/roles/httpd/tasks/main.yml`
 
 # References:
 
+* [YAML reference](http://www.yaml.org/refcard.html)
 * [Vagrant DNS plugin](https://github.com/phinze/landrush)
 * [Host shell plugin](https://github.com/phinze/vagrant-host-shell)
 * [Sublime Text 2/3 Ansible Language Pack](https://github.com/clifford-github/sublime-ansible)
