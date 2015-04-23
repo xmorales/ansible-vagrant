@@ -20,8 +20,8 @@
   file: path={{ item }}
         state=directory
   with_items:
-    - "{{ gluster_brick_dir }}"
-    - "{{ gluster_mount_dir }}"
+    - "{{ gluster.brick_dir }}"
+    - "{{ gluster.mount_dir }}"
   tags: filesystem
 
 - name: Copy gluster gluster repo
@@ -54,14 +54,14 @@
   command: gluster peer probe {{ item }}
   with_items:
     - "{{ [groups['gluster_slaves']][0] }}"
-  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
+  when: "'Volume Name: {{ gluster.vol_name }}' not in gluster_volume_info.stdout"
   register: gluster_probe_result
   changed_when: "'already in peer list' not in gluster_probe_result.stdout"
   run_once: true
   tags: glusterfs
 
   # http://adamj.eu/tech/2014/10/02/merging-groups-and-hostvars-in-ansible-variables/
-- name: Get hosts lists by comma separated
+- name: Get hosts list by comma separated
   debug:
     msg: |
       {% set comma = joiner(",") %}
@@ -77,14 +77,14 @@
 
 - name: Create and start gluster volume
   gluster_volume: state=present
-                  name="{{ gluster_vol_name }}"
+                  name="{{ gluster.vol_name }}"
                   replicas={{ item }}
-                  brick="{{gluster_brick_dir }}"
+                  brick="{{ gluster.brick_dir }}"
                   cluster="{{ cluster_nodes }}"
                   force=true
   with_items:
     - "{{ [groups['gluster_slaves']] | length }}"
-  when: "'Volume Name: {{ gluster_vol_name }}' not in gluster_volume_info.stdout"
+  when: "'Volume Name: {{ gluster.vol_name }}' not in gluster_volume_info.stdout"
   run_once: true
   ignore_errors: yes
   tags: glusterfs

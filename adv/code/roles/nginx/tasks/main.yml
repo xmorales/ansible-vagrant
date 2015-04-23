@@ -21,7 +21,7 @@
   tags: configuration
 
 - name: Using shell to create log folder
-  shell: mkdir -p "{{ log_folder }}"
+  shell: mkdir -p "{{ proxy.log_folder }}"
   tags: configuration
 
 - name: Remove default config

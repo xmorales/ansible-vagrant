@@ -17,6 +17,7 @@ Tested with:
 $ git clone https://github.com/wefner/ansible-vagrant.git
 $ cd ansible-vagrant/
 $ vagrant plugin install landrush
+$ vagrant plugin install vagrant-host-shell
 $ vagrant box add chef/centos-6.5 --provider virtualbox
 ```
 

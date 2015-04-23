@@ -1,9 +1,0 @@
----
-server_name: 'wordpress.vagrant.dev'
-ssl_certificate: 'vagrant.crt'
-ssl_certificate_key: 'vagrant.key'
-log_folder: '/var/log/nginx/proxy'
-upstream: 'webserver1.vagrant.dev'
-
-
-
