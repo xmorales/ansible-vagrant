@@ -190,6 +190,7 @@ Handler usage in `code/roles/httpd/tasks/main.yml`
 # References:
 
 * [Vagrant DNS plugin](https://github.com/phinze/landrush)
+* [Host shell plugin](https://github.com/phinze/vagrant-host-shell)
 * [Sublime Text 2/3 Ansible Language Pack](https://github.com/clifford-github/sublime-ansible)
 * [Ansible Examples](https://github.com/ansible/ansible-examples)
 * [Ansible modules extra](https://github.com/ansible/ansible-modules-extras)

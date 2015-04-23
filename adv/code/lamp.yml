@@ -23,7 +23,10 @@
     - glusterfs
     - httpd
 
-
-
-
+- hosts: db
+  remote_user: vagrant
+  sudo: yes
+  gather_facts: yes
+  roles:
+    - mysql
 

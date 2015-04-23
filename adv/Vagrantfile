@@ -36,9 +36,21 @@ hosts = [
   {
     :name => :webserver3,
     :group => [ "web", "gluster_slaves" ],
-    :forwards => { 80 => 8081 },
+    :forwards => { 80 => 8082 },
     :ip => "172.16.1.102",
     :disk => "./tmp/extra_disk3.vdi"
+  },
+  {
+    :name => :database1,
+    :group => [ "db" ],
+    :forwards => { 3306 => 3333 },
+    :ip => "172.16.1.110"
+  },
+  {
+    :name => :database2,
+    :group => [ "db" ],
+    :forwards => { 3306 => 3334 },
+    :ip => "172.16.1.111"
   }
 ]
 
@@ -53,10 +65,6 @@ config.vm.graceful_halt_timeout = 10
 
 config.vm.box = "chef/centos-6.5"
 config.vm.provision :shell, path: "libselinux.sh"
-
-config.vm.provision :host_shell do | host_shell |
-  host_shell.inline = 'cp .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory code/enviro/vagrant/hosts'
-end
 
 # 256MB RAM for all hosts
 config.vm.provider "virtualbox" do |vb|
@@ -84,6 +92,10 @@ hosts.each do | opts |
     end
   end
 end
+end
+
+config.vm.provision :host_shell do | host_shell |
+  host_shell.inline = 'cp .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory code/enviro/vagrant/hosts'
 end
 
 # setting up instance parameters
