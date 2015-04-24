@@ -6,14 +6,14 @@
                     manage_dir=yes
   tags: cluster-deployment
 
-- name: Copy private key debug
+- name: Copy private key
   copy: content="{{ certs[item] }}"
-        dest={{ ssh.key_path }}
+        dest={{ ssh.key_path }}/{{ item }}
         owner=vagrant
         group=vagrant
         mode=0600
   with_items:
-    - ssh_private_key
+    - cluster_rsa
   tags: cluster-deployment
 
 - name: Install base software
@@ -23,7 +23,6 @@
   with_items:
     - pacemaker
     - pcs
-    - expect
   tags: cluster-deployment
 
 - name: Ensure pcs daemon is running

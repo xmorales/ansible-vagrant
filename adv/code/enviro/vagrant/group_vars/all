@@ -37,4 +37,4 @@ mysql:
     port: '3306'
 
 ssh:
-    key_path: '/home/vagrant/.ssh/cluster_dsa'
+    key_path: '/home/vagrant/.ssh'
