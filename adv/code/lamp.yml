@@ -19,9 +19,12 @@
   remote_user: vagrant
   sudo: yes
   gather_facts: yes
+  vars_files:
+    - vars/certs.yml
   roles:
     - glusterfs
     - httpd
+    - clustering
 
 - hosts: db
   remote_user: vagrant

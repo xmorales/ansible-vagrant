@@ -1,37 +1,40 @@
 ---
 httpd:
-  port: '80'
-  server_name: &server_name 'wordpress.vagrant.dev'
-  log_folder: '/var/log/httpd/website'
+    port: '80'
+    server_name: &server_name 'wordpress.vagrant.dev'
+    log_folder: '/var/log/httpd/website'
 
 proxy:
-  server_name: *server_name
-  ssl_certificate: 'vagrant.crt'
-  ssl_certificate_key: 'vagrant.key'
-  log_folder: '/var/log/nginx/proxy'
-  upstream: 'webserver1.vagrant.dev'
+    server_name: *server_name
+    ssl_certificate: 'vagrant.crt'
+    ssl_certificate_key: 'vagrant.key'
+    log_folder: '/var/log/nginx/proxy'
+    upstream: 'webserver1.vagrant.dev'
 
 gluster:
-  mount_dir: '/mnt/gluster'
-  brick_dir: '/srv/sdb1/brick'
-  vol_name: glustervol
+    mount_dir: '/mnt/gluster'
+    brick_dir: '/srv/sdb1/brick'
+    vol_name: glustervol
 
 ### https://github.com/ansible/ansible-examples/
 wp:
-  version: 3.7
-  log_folder: '/var/log/httpd/wordpress'
-  sha256sum: 94b8b7a7241ec0817defa1c35f738d777f01ac17a4e45ee325c0f1778504fd94
-  db_name: wordpress
-  db_user: wordpress
-  db_password: secret
-  db_host: database1.vagrant.dev
-  mysql_port: 3306
-  auto_up_disable: false
-  #Define Core Update Level
-  #true  = Development, minor, and major updates are all enabled
-  #false = Development, minor, and major updates are all disabled
-  #minor = Minor updates are enabled, development, and major updates are disabled
-  core_update_level: true
+    version: 3.7
+    log_folder: '/var/log/httpd/wordpress'
+    sha256sum: 94b8b7a7241ec0817defa1c35f738d777f01ac17a4e45ee325c0f1778504fd94
+    db_name: wordpress
+    db_user: wordpress
+    db_password: secret
+    db_host: database1.vagrant.dev
+    mysql_port: 3306
+    auto_up_disable: false
+    #Define Core Update Level
+    #true  = Development, minor, and major updates are all enabled
+    #false = Development, minor, and major updates are all disabled
+    #minor = Minor updates are enabled, development, and major updates are disabled
+    core_update_level: true
 
 mysql:
-  port: '3306'
+    port: '3306'
+
+ssh:
+    key_path: '/home/vagrant/.ssh'

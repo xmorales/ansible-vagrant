@@ -173,18 +173,36 @@ Handler usage in `code/roles/httpd/tasks/main.yml`
   notify: reload httpd
 ```
 
+Ansible-Vault
+=============
+This program comes with the whole Ansible suite and its goal is to encrypt sensitive data stored in files. Proxy certificates and SSH keys are stored there as encrypted so that it can safe on repositories.
+
+You will find it under `vars/certs.yml`. You can either `encrypt`, `decrypt`, or `edit` a vaulted file.
+
+`$ ansible-vault edit vars/certs.yml`
+
+Since this is for education purposes, `vagrant` is the master password for this file.
+> When the file is opened, its hash will change so git will expect changes even if you modified nothing so you might want to consider `git stash` before committing changes.
+
 
 # Techdebt
 
+## Common
 - [X] provision machines without disk
 - [ ] inventory in json dump
 - [X] dynamic inventory
+- [ ] fdisk extra_disk automatically
+
+## Glusterfs
 - [X] glusterfs run tasks on one node only
 - [X] glusterfs manual installation
 - [X] glusterfs peer run only on slaves
+
+## Clustering
+- [X] SSH passwordless among instances
 - [ ] httpd cluster
 - [ ] mysql cluster
-- [ ] fdisk extra_disk automatically
+- [ ] dynamic pcs cluster auth
 
 
 # References:
