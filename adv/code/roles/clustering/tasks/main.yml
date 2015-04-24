@@ -1,0 +1,46 @@
+---
+- name: Copy public key to hosts
+  authorized_key: user=vagrant
+                    state=present
+                    key="{{ cluster.ssh_pub_key }}"
+                    manage_dir=yes
+  tags: cluster-deployment
+
+- name: Copy private key debug
+  copy: content="{{ certs[item] }}"
+        dest={{ ssh.key_path }}
+        owner=vagrant
+        group=vagrant
+        mode=0600
+  with_items:
+    - ssh_private_key
+  tags: cluster-deployment
+
+- name: Install base software
+  yum: name={{ item }}
+       state=present
+       update_cache=yes
+  with_items:
+    - pacemaker
+    - pcs
+    - expect
+  tags: cluster-deployment
+
+- name: Ensure pcs daemon is running
+  service: name=pcsd
+           state=started
+           enabled=yes
+  tags: cluster-deployment
+
+- name: Check if hacluster user exists
+  user: name=hacluster
+        state=present
+  register: hacluster_present
+  tags: cluster-deployment
+
+  # python -c 'import crypt; print crypt.crypt("vagrant", "vagrant")'
+- name: Update hacluster user password
+  user: name=hacluster
+        password={{ cluster.password }}
+        update_password=always
+  tags: cluster-deployment
