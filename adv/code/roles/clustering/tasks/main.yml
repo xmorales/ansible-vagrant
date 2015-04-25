@@ -1,9 +1,26 @@
 ---
+- name: Check if hacluster user exists
+  user: name=hacluster
+        state=present
+  register: hacluster_present
+  tags: cluster-deployment
+
+  # python -c 'import crypt; print crypt.crypt("vagrant", "vagrant")'
+- name: Update hacluster user password
+  user: name=hacluster
+        password={{ cluster.password }}
+        update_password=always
+  when: hacluster_present.changed
+  tags: cluster-deployment
+
 - name: Copy public key to hosts
-  authorized_key: user=vagrant
+  authorized_key: user={{ item }}
                     state=present
                     key="{{ cluster.ssh_pub_key }}"
                     manage_dir=yes
+  with_items:
+    - vagrant
+    - hacluster
   tags: cluster-deployment
 
 - name: Copy private key
@@ -16,6 +33,12 @@
     - cluster_rsa
   tags: cluster-deployment
 
+- name: Load key to ssh agent
+  shell: "eval `ssh-agent -s`; ssh-add {{ ssh.key_path }}/{{ item }}"
+  with_items:
+    - cluster_rsa
+  tags: cluster-deployment
+
 - name: Install base software
   yum: name={{ item }}
        state=present
@@ -23,6 +46,7 @@
   with_items:
     - pacemaker
     - pcs
+    - cman
   tags: cluster-deployment
 
 - name: Ensure pcs daemon is running
@@ -31,15 +55,30 @@
            enabled=yes
   tags: cluster-deployment
 
-- name: Check if hacluster user exists
-  user: name=hacluster
-        state=present
-  register: hacluster_present
+- name: Ensure cluster.conf exists
+  shell: mkdir -p /etc/cluster; touch /etc/cluster/cluster.conf
   tags: cluster-deployment
 
-  # python -c 'import crypt; print crypt.crypt("vagrant", "vagrant")'
-- name: Update hacluster user password
-  user: name=hacluster
-        password={{ cluster.password }}
-        update_password=always
+# TODO: auth nodes automatically
+- name: Auth nodes
+  shell: pcs cluster auth webserver1 webserver2 webserver3 -u hacluster
+  run_once: true
   tags: cluster-deployment
+
+# This will generate cluster.conf accordingly
+- name: setup cluster
+  shell: pcs cluster setup --name webcluster webserver1 webserver2 webserver3
+  register: auth_nodes
+  run_once: true
+  tags: cluster-deployment
+
+- name: Start cluster
+  shell: pcs cluster start --all
+  run_once: true
+  tags: cluster-deployment
+
+
+
+
+
+
