@@ -81,9 +81,10 @@
                   replicas={{ item }}
                   brick="{{ gluster.brick_dir }}"
                   cluster="{{ cluster_nodes }}"
+                  transport=tcp
                   force=true
   with_items:
-    - "{{ [groups['gluster_slaves']] | length }}"
+    - "{{ [groups['gluster_slaves']][0] | length }}"
   when: "'Volume Name: {{ gluster.vol_name }}' not in gluster_volume_info.stdout"
   run_once: true
   ignore_errors: yes

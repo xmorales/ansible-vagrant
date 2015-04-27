@@ -4,25 +4,26 @@
 # based on:
 # http://tjheeta.github.io/2014/12/01/ansible-vagrant-multiple-nodes.html
 
-domain = ".vagrant.dev"
-
 hosts = [
   {
     :name => :proxy1,
     :group => "proxy",
     :forwards => { 443 => 4443 },
+    :sshport => { 22 => 2210 },
     :ip => "172.16.1.120"
   },
   {
     :name => :proxy2,
     :group => "proxy",
     :forwards => { 443 => 4444 },
+    :sshport => { 22 => 2211 },
     :ip => "172.16.1.121"
   },
   {
     :name => :webserver1,
     :group => "web",
     :forwards => { 80 => 8080 },
+    :sshport => { 22 => 2212 },
     :ip => "172.16.1.100",
     :disk => "./tmp/extra_disk1.vdi"
   },
@@ -30,6 +31,7 @@ hosts = [
     :name => :webserver2,
     :group => [ "web", "gluster_slaves" ],
     :forwards => { 80 => 8081 },
+    :sshport => { 22 => 2213 },
     :ip => "172.16.1.101",
     :disk => "./tmp/extra_disk2.vdi"
   },
@@ -37,6 +39,7 @@ hosts = [
     :name => :webserver3,
     :group => [ "web", "gluster_slaves" ],
     :forwards => { 80 => 8082 },
+    :sshport => { 22 => 2214 },
     :ip => "172.16.1.102",
     :disk => "./tmp/extra_disk3.vdi"
   },
@@ -44,12 +47,14 @@ hosts = [
     :name => :database1,
     :group => "db",
     :forwards => { 3306 => 3333 },
+    :sshport => { 22 => 2215 },
     :ip => "172.16.1.110"
   },
   {
     :name => :database2,
     :group => "db",
     :forwards => { 3306 => 3334 },
+    :sshport => { 22 => 2216 },
     :ip => "172.16.1.111"
   }
 ]
@@ -60,6 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 config.ssh.forward_agent = true
 config.landrush.enabled = "true"
+config.landrush.tld = 'vagrant.dev'
 config.vm.boot_timeout = 90
 config.vm.graceful_halt_timeout = 10
 
@@ -103,6 +109,9 @@ hosts.each_with_index do | opts, index |
     opts[:forwards].each do |guest_port,host_port|
       config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true
     end if opts[:forwards]
+    opts[:sshport].each do |guest_port,host_port|
+      config.vm.network :forwarded_port, guest: guest_port, host: host_port, auto_correct: true, id: "ssh"
+    end if opts[:sshport]
     config.vm.provider :virtualbox do |vb|
     # create disk if in Hash
     if opts.has_key?(:disk)

@@ -24,7 +24,7 @@
   roles:
     - glusterfs
     - httpd
-    - clustering
+    # - clustering
 
 - hosts: db
   remote_user: vagrant

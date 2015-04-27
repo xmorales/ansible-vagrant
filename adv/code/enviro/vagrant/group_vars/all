@@ -14,7 +14,7 @@ proxy:
 gluster:
     mount_dir: '/mnt/gluster'
     brick_dir: '/srv/sdb1/brick'
-    vol_name: glustervol
+    vol_name: 'glustervol'
 
 ### https://github.com/ansible/ansible-examples/
 wp:
