@@ -1,5 +1,3 @@
  <html>
- {% for host in groups['web'] %}
- <body>I am {{ host }} </body>
- {% endfor %}
+ <body>I am {{ ansible_hostname }} </body>
  </html>

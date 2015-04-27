@@ -49,10 +49,20 @@
     - cman
   tags: cluster-deployment
 
-- name: Ensure pcs daemon is running
-  service: name=pcsd
+- name: Ensure all we need is is running
+  service: name=pacemaker
            state=started
            enabled=yes
+  # with_items:
+  #   - pcsd
+  #   - pacemaker
+  #   - corosync
+  tags: cluster-deployment
+
+- name: Copy server-status virtualhost
+  template: src=monitor.conf
+            dest=/etc/httpd/conf.d/
+  notify: reload httpd
   tags: cluster-deployment
 
 - name: Ensure cluster.conf exists

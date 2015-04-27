@@ -23,7 +23,8 @@
 
 - name: Copy index html
   template: src=index.html
-            dest={{ gluster.mount_dir }}
+            dest=/var/www/html/
+
   tags: configuration
 
 - name: Make sure log folder exists
@@ -31,12 +32,6 @@
         state=directory
         owner=apache
         group=apache
-  tags: configuration
-
-- name: Copy server-status virtualhost
-  template: src=monitor.conf
-            dest=/etc/httpd/conf.d/
-  notify: reload httpd
   tags: configuration
 
 - name: Copy http config file
