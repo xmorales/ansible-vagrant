@@ -33,12 +33,6 @@
     - cluster_rsa
   tags: cluster-deployment
 
-- name: Load key to ssh agent
-  shell: "eval `ssh-agent -s`; ssh-add {{ ssh.key_path }}/{{ item }}"
-  with_items:
-    - cluster_rsa
-  tags: cluster-deployment
-
 - name: Install base software
   yum: name={{ item }}
        state=present
@@ -49,14 +43,14 @@
     - cman
   tags: cluster-deployment
 
-- name: Ensure all we need is is running
+- name: Ensure all we need is running
   service: name=pacemaker
            state=started
            enabled=yes
-  # with_items:
-  #   - pcsd
-  #   - pacemaker
-  #   - corosync
+  with_items:
+    - pcsd
+    - pacemaker
+    - corosync
   tags: cluster-deployment
 
 - name: Copy server-status virtualhost
@@ -65,9 +59,16 @@
   notify: reload httpd
   tags: cluster-deployment
 
-- name: Ensure cluster.conf exists
-  shell: mkdir -p /etc/cluster; touch /etc/cluster/cluster.conf
+- name: Load key to ssh agent
+  shell: "eval `ssh-agent -s`; ssh-add {{ ssh.key_path }}/{{ item }}"
+  with_items:
+    - cluster_rsa
   tags: cluster-deployment
+
+# - name: Ensure cluster.conf exists
+#   shell: mkdir -p /etc/cluster; touch /etc/cluster/cluster.conf
+#   run_once: true
+#   tags: cluster-deployment
 
 # TODO: auth nodes automatically
 - name: Auth nodes
