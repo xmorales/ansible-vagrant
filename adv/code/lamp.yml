@@ -22,8 +22,8 @@
   vars_files:
     - vars/certs.yml
   roles:
-    - glusterfs
-    - httpd
+    # - glusterfs
+    # - httpd
     - clustering
 
 - hosts: db
