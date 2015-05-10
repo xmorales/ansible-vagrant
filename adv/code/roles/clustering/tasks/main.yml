@@ -26,6 +26,20 @@
     - vagrant
   tags: [cluster, deployment]
 
+- name: Check if hacluster user exists
+  user: name=hacluster
+        state=present
+  register: hacluster_present
+  tags: [cluster, deployment]
+
+  # python -c 'import crypt; print crypt.crypt("vagrant", "vagrant")'
+- name: Update hacluster user password
+  user: name=hacluster
+        password={{ cluster.password }}
+        update_password=always
+  when: hacluster_present.changed
+  tags: [cluster, deployment]
+
 - name: Install base software
   yum: name={{ item }}
        state=present
@@ -34,6 +48,7 @@
     - pacemaker
     - corosync
     - cman
+    - pcs
   tags: [cluster, deployment]
 
 - name: Make sure corosync is off
@@ -60,15 +75,43 @@
   tags: [cluster, configuration]
 
 - name: Start cluster on first node
-  service: name=pacemaker state=started enabled=yes
+  service: name={{ item }} state=started enabled=yes
   run_once: true
   register: cluster_status
+  with_items:
+    - pacemaker
+    - pcsd
   tags: [cluster, configuration]
 
-- name: Start cluster on slaves if master is up
-  service: name=pacemaker state=started enabled=yes
+- name: Start cluster on slaves if master is up correctly
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - pacemaker
+    - pcsd
   when: ansible_hostname in groups['gluster_slaves'] and "cluster_status.rc == 0"
   tags: [cluster, configuration]
+
+  # http://adamj.eu/tech/2014/10/02/merging-groups-and-hostvars-in-ansible-variables/
+- name: Get hosts list by space separated
+  debug:
+    msg: |
+      {% set space = joiner(" ") %}
+      {% for item in [groups['web']][0] -%}
+        {{ space() }}{{ item }}
+      {%- endfor %}
+  run_once: true
+  register: cluster_nodes_result
+  tags: [configuration, cluster]
+
+- name: Set hosts list as fact
+  set_fact: cluster_nodes="{{ cluster_nodes_result.msg }}"
+  tags: [configuration, cluster]
+
+- name: Auth nodes
+  shell: "echo {{ cluster.auth_pwd }} | pcs cluster auth {{ cluster_nodes }} -u hacluster"
+  no_log: true
+  run_once: true
+  tags: [configuration, cluster]
 
 - name: Copy server-status virtualhost
   template: src=monitor.conf

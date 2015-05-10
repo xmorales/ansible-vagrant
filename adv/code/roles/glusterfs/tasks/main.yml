@@ -69,11 +69,11 @@
         {{ comma() }}{{ item }}
       {%- endfor %}
   run_once: true
-  register: cluster_nodes_result
+  register: gluster_nodes_result
   tags: [configuration, glusterfs]
 
 - name: Set hosts list as fact
-  set_fact: cluster_nodes="{{ cluster_nodes_result.msg }}"
+  set_fact: gluster_nodes="{{ gluster_nodes_result.msg }}"
   tags: [configuration, glusterfs]
 
 - name: Create and start gluster volume
@@ -81,7 +81,7 @@
                   name="{{ gluster.vol_name }}"
                   replicas={{ item }}
                   brick="{{ gluster.brick_dir }}"
-                  cluster="{{ cluster_nodes }}"
+                  cluster="{{ gluster_nodes }}"
                   transport=tcp
                   force=true
   with_items:
