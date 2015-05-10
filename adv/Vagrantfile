@@ -30,7 +30,7 @@ hosts = [
   {
     :name => :webserver2,
     :group => [ "web", "gluster_slaves" ],
-    :forwards => { 80 => 8081, 5405 => 5000 },
+    :forwards => { 80 => 8081, 5405 => 5001 },
     :sshport => { 22 => 2213 },
     :ip => "172.16.1.101",
     :disk => "./tmp/extra_disk2.vdi"
@@ -38,7 +38,7 @@ hosts = [
   {
     :name => :webserver3,
     :group => [ "web", "gluster_slaves" ],
-    :forwards => { 80 => 8082, 5405 => 5000 },
+    :forwards => { 80 => 8082, 5405 => 5002 },
     :sshport => { 22 => 2214 },
     :ip => "172.16.1.102",
     :disk => "./tmp/extra_disk3.vdi"
@@ -64,8 +64,6 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 config.ssh.forward_agent = true
-#config.landrush.enabled = "true"
-#config.landrush.tld = 'vagrant.dev'
 config.vm.boot_timeout = 90
 config.vm.graceful_halt_timeout = 10
 

@@ -7,32 +7,31 @@
          opts="defaults,_netdev"
   register: mount_result
   when: groups['gluster_slaves'] and "'remount' not in mount_result.stdout"
-  tags: deployment
+  tags: [deployment, glusterfs]
 
 - name: Install httpd
   yum: name=httpd
        state=present
        update_cache=yes
-  tags: deployment
+  tags: [deployment, httpd]
 
 - name: Make sure httpd is running
   service: name=httpd
            state=started
            enabled=yes
-  tags: deployment
+  tags: [deployment, httpd]
 
 - name: Copy index html
   template: src=index.html
             dest=/var/www/html/
-
-  tags: configuration
+  tags: [configuration, httpd]
 
 - name: Make sure log folder exists
   file: path={{ httpd.log_folder }}
         state=directory
         owner=apache
         group=apache
-  tags: configuration
+  tags: [configuration, httpd]
 
 - name: Copy http config file
   template: src=httpd.conf
@@ -40,4 +39,4 @@
             owner=apache
             group=apache
   notify: reload httpd
-  tags: configuration
+  tags: [configuration, httpd]

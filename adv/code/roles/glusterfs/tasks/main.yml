@@ -6,7 +6,7 @@
               dev=/dev/sdb1
               opts="-cc"
               force=yes
-  tags: filesystem
+  tags: [glusterfs, filesystem]
 
 - name: Mount filesystem
   mount: name=/srv/sdb1
@@ -14,7 +14,7 @@
          fstype=ext4
          state=mounted
          opts="defaults"
-  tags: filesystem
+  tags: [glusterfs, filesystem]
 
 - name: Ensure brick directory exists
   file: path={{ item }}
@@ -22,12 +22,12 @@
   with_items:
     - "{{ gluster.brick_dir }}"
     - "{{ gluster.mount_dir }}"
-  tags: filesystem
+  tags: [glusterfs, filesystem]
 
 - name: Copy gluster gluster repo
   copy: src=gluster.repo
         dest=/etc/yum.repos.d/
-  tags: [deployment, gluterfs]
+  tags: [deployment, glusterfs]
 
 - name: Install GlusterFS
   yum: name={{ item }}
@@ -48,7 +48,7 @@
 - name: Check if Gluster volumes already exist
   shell: "gluster volume info"
   register: gluster_volume_info
-  tags: glusterfs
+  tags: [configuration, glusterfs]
 
 - name: Connect peers
   command: gluster peer probe {{ item }}
@@ -58,7 +58,7 @@
   register: gluster_probe_result
   changed_when: "'already in peer list' not in gluster_probe_result.stdout"
   run_once: true
-  tags: glusterfs
+  tags: [configuration, glusterfs]
 
   # http://adamj.eu/tech/2014/10/02/merging-groups-and-hostvars-in-ansible-variables/
 - name: Get hosts list by comma separated
@@ -70,10 +70,11 @@
       {%- endfor %}
   run_once: true
   register: cluster_nodes_result
-  tags: glusterfs
+  tags: [configuration, glusterfs]
 
 - name: Set hosts list as fact
   set_fact: cluster_nodes="{{ cluster_nodes_result.msg }}"
+  tags: [configuration, glusterfs]
 
 - name: Create and start gluster volume
   gluster_volume: state=present
@@ -88,7 +89,4 @@
   when: "'Volume Name: {{ gluster.vol_name }}' not in gluster_volume_info.stdout"
   run_once: true
   ignore_errors: yes
-  tags: glusterfs
-
-
-
+  tags: [configuration, glusterfs]
