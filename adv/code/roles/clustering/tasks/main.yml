@@ -1,25 +1,10 @@
 ---
-- name: Check if hacluster user exists
-  user: name=hacluster
-        state=present
-  register: hacluster_present
-  tags: cluster-deployment
-
-  # python -c 'import crypt; print crypt.crypt("vagrant", "vagrant")'
-- name: Update hacluster user password
-  user: name=hacluster
-        password={{ cluster.password }}
-        shell=yes
-  when: hacluster_present.changed
-  tags: cluster-deployment
-
 - name: Copy public key to hosts
   authorized_key: user={{ item }}
                   key="{{ cluster.ssh_pub_key }}"
   with_items:
     - vagrant
-    - hacluster
-  tags: cluster-deployment
+  tags: [cluster, deployment]
 
 - name: Copy private key
   copy: content="{{ certs.cluster_rsa }}"
@@ -29,8 +14,7 @@
         group={{ item }}
   with_items:
     - vagrant
-    - hacluster
-  tags: cluster-deployment
+  tags: [cluster, deployment]
 
 - name: Copy ssh config
   copy: src=config
@@ -40,8 +24,7 @@
         group={{ item }}
   with_items:
     - vagrant
-    - hacluster
-  tags: cluster-deployment
+  tags: [cluster, deployment]
 
 - name: Install base software
   yum: name={{ item }}
@@ -49,59 +32,48 @@
        update_cache=yes
   with_items:
     - pacemaker
-    - pcs
+    - corosync
     - cman
-  tags: cluster-deployment
+  tags: [cluster, deployment]
+
+- name: Make sure corosync is off
+  service: name=corosync
+           state=stopped
+           enabled=no
+  tags: [cluster, deployment]
+
+- name: Set no quorum to the clusters
+  lineinfile: backup=yes
+              dest=/etc/sysconfig/cman
+              state=present
+              line="CMAN_QUORUM_TIMEOUT=0"
+  tags: [cluster, deployment]
 
 - name: Copy corosync configuration
-  copy: src=corosync.conf
-        dest=/etc/corosync/
+  template: src=corosync.conf
+            dest=/etc/corosync/
+  tags: [cluster, configuration]
 
-- name: Corosync to load pacemaker plugin
-  file: path=/etc/corosync/services.d/pcmk
-        state=absent
-
-- name: cluster config
+- name: Cluster config
   template: src=cluster.conf
             dest=/etc/cluster/
+  tags: [cluster, configuration]
 
-- name: Restart all we need
-  service: name={{ item }}
-           state=restarted
-           enabled=yes
-  with_items:
-    - pcsd
-    - pacemaker
-    - corosync
-    # - cman
-  tags: cluster-deployment
+- name: Start cluster on first node
+  service: name=pacemaker state=started enabled=yes
+  run_once: true
+  register: cluster_status
+  tags: [cluster, configuration]
+
+- name: Start cluster on slaves if master is up
+  service: name=pacemaker state=started enabled=yes
+  when: ansible_hostname in groups['gluster_slaves'] and "cluster_status.rc == 0"
+  tags: [cluster, configuration]
 
 - name: Copy server-status virtualhost
   template: src=monitor.conf
             dest=/etc/httpd/conf.d/
   notify: reload httpd
-  tags: cluster-deployment
-
-# TODO: auth nodes automatically
-- name: Auth nodes
-  shell: pcs cluster auth webserver1 webserver2 webserver3 -u hacluster
-  run_once: true
-  tags: cluster-deployment
-
-# This will generate cluster.conf accordingly
-- name: setup cluster
-  shell: pcs cluster setup --name webcluster webserver1 webserver2 webserver3
-  register: auth_nodes
-  run_once: true
-  tags: cluster-deployment
-
-- name: Start cluster
-  shell: pcs cluster start --all
-  run_once: true
-  tags: cluster-deployment
-
-
-
-
+  tags: [cluster, configuration]
 
 

@@ -36,5 +36,9 @@ wp:
 mysql:
     port: '3306'
 
-ssh:
-    key_path: '/home/vagrant/.ssh'
+clustering:
+    name: 'webcluster'
+    debug: 'on'
+    network: '172.16.1.0'
+    port: '5405'
+    multicast: '239.255.1.1'
