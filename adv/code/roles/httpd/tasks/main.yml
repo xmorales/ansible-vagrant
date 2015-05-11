@@ -15,10 +15,10 @@
        update_cache=yes
   tags: [deployment, httpd]
 
-- name: Make sure httpd is running
+- name: Make sure httpd is running but not on startup
   service: name=httpd
            state=started
-           enabled=yes
+           enabled=no
   tags: [deployment, httpd]
 
 - name: Copy index html
