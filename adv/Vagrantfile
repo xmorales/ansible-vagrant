@@ -14,7 +14,7 @@ hosts = [
   },
   {
     :name => :proxy2,
-    :group => "proxy",
+    :group => [ "proxy", "proxy_slaves" ],
     :forwards => { 443 => 4444 },
     :sshport => { 22 => 2211 },
     :ip => "172.16.1.121"
@@ -52,7 +52,7 @@ hosts = [
   },
   {
     :name => :database2,
-    :group => "db",
+    :group => [ "db", "db_slaves" ],
     :forwards => { 3306 => 3334 },
     :sshport => { 22 => 2216 },
     :ip => "172.16.1.111"
