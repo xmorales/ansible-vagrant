@@ -14,6 +14,7 @@
     - vars/certs.yml
   roles:
     - nginx
+    - clustering
 
 - hosts: web
   remote_user: vagrant
@@ -32,4 +33,5 @@
   gather_facts: yes
   roles:
     - mysql
+    - clustering
 

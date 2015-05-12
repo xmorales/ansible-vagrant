@@ -83,12 +83,17 @@
     - pcsd
   tags: [cluster, configuration]
 
+- name: get group
+  set_fact: group_names
+  tags: [cluster, configuration]
+
 - name: Start cluster on slaves if master is up correctly
   service: name={{ item }} state=started enabled=yes
   with_items:
     - pacemaker
     - pcsd
-  when: ansible_hostname in groups['gluster_slaves'] and "cluster_status.rc == 0"
+  # when: ansible_hostname in groups['gluster_slaves'] and "cluster_status.rc == 0"
+  when: cluster_status.rc == 0
   tags: [cluster, configuration]
 
   # http://adamj.eu/tech/2014/10/02/merging-groups-and-hostvars-in-ansible-variables/
@@ -96,10 +101,11 @@
   debug:
     msg: |
       {% set space = joiner(" ") %}
-      {% for item in [groups['web']][0] -%}
+      {% for item in [group_names][0] -%}
         {{ space() }}{{ item }}
       {%- endfor %}
   run_once: true
+  when: ansible_hostname in groups
   register: cluster_nodes_result
   tags: [configuration, cluster]
 
