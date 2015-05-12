@@ -3,6 +3,8 @@ httpd:
     port: '80'
     server_name: &server_name 'wordpress.vagrant.dev'
     log_folder: '/var/log/httpd/website'
+    config_file: '/etc/httpd/conf/httpd.conf'
+    status_url: 'http://localhost/server-status'
 
 proxy:
     server_name: *server_name
@@ -10,6 +12,7 @@ proxy:
     ssl_certificate_key: 'vagrant.key'
     log_folder: '/var/log/nginx/proxy'
     upstream: 'webserver1.vagrant.dev'
+    vip: '172.16.1.254'
 
 gluster:
     mount_dir: '/mnt/gluster'

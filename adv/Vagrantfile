@@ -44,6 +44,20 @@ hosts = [
     :disk => "./tmp/extra_disk3.vdi"
   },
   {
+    :name => :webserver4,
+    :group => [ "web", "gluster_slaves" ],
+    :forwards => { 80 => 8081, 5405 => 5001 },
+    :sshport => { 22 => 2220 },
+    :ip => "172.16.1.105",
+  },
+  {
+    :name => :webserver5,
+    :group => [ "web", "gluster_slaves" ],
+    :forwards => { 80 => 8082, 5405 => 5002 },
+    :sshport => { 22 => 2224 },
+    :ip => "172.16.1.106",
+  },
+  {
     :name => :database1,
     :group => "db",
     :forwards => { 3306 => 3333 },

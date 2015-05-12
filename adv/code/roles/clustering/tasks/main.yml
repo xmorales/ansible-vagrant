@@ -62,6 +62,7 @@
               dest=/etc/sysconfig/cman
               state=present
               line="CMAN_QUORUM_TIMEOUT=0"
+  when: has_quorum == "False"
   tags: [cluster, deployment]
 
 - name: Copy corosync configuration
@@ -88,7 +89,7 @@
   with_items:
     - pacemaker
     - pcsd
-  when: ansible_hostname in groups['gluster_slaves'] and "cluster_status.rc == 0"
+  when: ansible_hostname in slaves and "cluster_status.rc == 0"
   tags: [cluster, configuration]
 
   # http://adamj.eu/tech/2014/10/02/merging-groups-and-hostvars-in-ansible-variables/
@@ -119,4 +120,53 @@
   notify: reload httpd
   tags: [cluster, configuration]
 
+- name: Check stonith status
+  shell: pcs property show stonith-enabled
+  register: stonith_status
+  tags: [cluster, configuration]
+
+- name: Disable stonith
+  shell: pcs property set stonith-enabled=false
+  when: "'true' in stonith_status.stdout"
+  run_once: true
+  tags: [cluster, configuration]
+
+- name: Check if httpd is already a resource
+  shell: pcs resource
+  register: resources_result
+  tags: [cluster, configuration]
+
+- name: Set a VIP
+  shell: "pcs resource create ClusterIP ocf:heartbeat:IPaddr2 ip={{ clustering.vip }} cidr_netmask=32 op monitor interval=1min"
+  run_once: true
+  when: "'No resources' in resources_result.stdout"
+  tags: [cluster, configuration]
+
+- name: Check resource defaults
+  shell: pcs resource defaults
+  register: resource_defaults
+  run_once: true
+  tags: [cluster, configuration]
+
+- name: Change defaults
+  shell: "pcs resource op defaults timeout=240s"
+  run_once: true
+  when: "'No defaults set' in resource_defaults.stdout"
+  tags: [cluster, configuration]
+
+- name: Activate httpd in clustering
+  shell: pcs resource create Webserver ocf:heartbeat:apache configfile={{ httpd.config_file }} statusurl="{{ httpd.status_url }}"
+  run_once: true
+  when: "'No resources' in resources_result.stdout"
+  tags: [cluster, configuration]
+
+- name: Ensure resources run on the same host
+  shell: pcs constraint colocation add Webserver with ClusterIP INFINITY
+  run_once: true
+  tags: [cluster, configuration]
+
+- name: And resources run in order
+  shell: pcs constraint order ClusterIP then Webserver
+  run_once: true
+  tags: [cluster, configuration]
 
