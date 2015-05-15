@@ -1,0 +1,6 @@
+secret.txt
+*pyc
+.DS_Store
+*hosts*
+*tmp*
+*.vagrant*

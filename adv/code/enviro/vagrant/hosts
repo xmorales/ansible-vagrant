@@ -2,8 +2,8 @@
 
 # MISSING: 'database1' machine was probably removed without using Vagrant. This machine should be recreated.
 # MISSING: 'database2' machine was probably removed without using Vagrant. This machine should be recreated.
-# MISSING: 'proxy1' machine was probably removed without using Vagrant. This machine should be recreated.
-# MISSING: 'proxy2' machine was probably removed without using Vagrant. This machine should be recreated.
+proxy1 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2210
+proxy2 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2211
 webserver1 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2212
 webserver2 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2213
 webserver3 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2214
@@ -11,11 +11,15 @@ webserver3 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2214
 # MISSING: 'webserver5' machine was probably removed without using Vagrant. This machine should be recreated.
 
 [all]
+proxy1
+proxy2
 webserver1
 webserver2
 webserver3
 
 [proxy]
+proxy1
+proxy2
 
 [web]
 webserver1

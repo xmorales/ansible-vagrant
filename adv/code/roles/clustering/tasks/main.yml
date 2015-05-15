@@ -92,81 +92,11 @@
   when: ansible_hostname in slaves and "cluster_status.rc == 0"
   tags: [cluster, configuration]
 
-  # http://adamj.eu/tech/2014/10/02/merging-groups-and-hostvars-in-ansible-variables/
-- name: Get hosts list by space separated
-  debug:
-    msg: |
-      {% set space = joiner(" ") %}
-      {% for item in [groups['web']][0] -%}
-        {{ space() }}{{ item }}
-      {%- endfor %}
-  run_once: true
-  register: cluster_nodes_result
-  tags: [configuration, cluster]
-
-- name: Set hosts list as fact
-  set_fact: cluster_nodes="{{ cluster_nodes_result.msg }}"
-  tags: [configuration, cluster]
-
 - name: Auth nodes
-  shell: "echo {{ cluster.auth_pwd }} | pcs cluster auth {{ cluster_nodes }} -u hacluster"
+  shell: "echo {{ cluster.auth_pwd }} | pcs cluster auth {{ nodes }} -u hacluster"
   no_log: true
   run_once: true
   tags: [configuration, cluster]
 
-- name: Copy server-status virtualhost
-  template: src=monitor.conf
-            dest=/etc/httpd/conf.d/
-  notify: reload httpd
-  tags: [cluster, configuration]
 
-- name: Check stonith status
-  shell: pcs property show stonith-enabled
-  register: stonith_status
-  tags: [cluster, configuration]
-
-- name: Disable stonith
-  shell: pcs property set stonith-enabled=false
-  when: "'true' in stonith_status.stdout"
-  run_once: true
-  tags: [cluster, configuration]
-
-- name: Check if httpd is already a resource
-  shell: pcs resource
-  register: resources_result
-  tags: [cluster, configuration]
-
-- name: Set a VIP
-  shell: "pcs resource create ClusterIP ocf:heartbeat:IPaddr2 ip={{ clustering.vip }} cidr_netmask=32 op monitor interval=1min"
-  run_once: true
-  when: "'No resources' in resources_result.stdout"
-  tags: [cluster, configuration]
-
-- name: Check resource defaults
-  shell: pcs resource defaults
-  register: resource_defaults
-  run_once: true
-  tags: [cluster, configuration]
-
-- name: Change defaults
-  shell: "pcs resource op defaults timeout=240s"
-  run_once: true
-  when: "'No defaults set' in resource_defaults.stdout"
-  tags: [cluster, configuration]
-
-- name: Activate httpd in clustering
-  shell: pcs resource create Webserver ocf:heartbeat:apache configfile={{ httpd.config_file }} statusurl="{{ httpd.status_url }}"
-  run_once: true
-  when: "'No resources' in resources_result.stdout"
-  tags: [cluster, configuration]
-
-- name: Ensure resources run on the same host
-  shell: pcs constraint colocation add Webserver with ClusterIP INFINITY
-  run_once: true
-  tags: [cluster, configuration]
-
-- name: And resources run in order
-  shell: pcs constraint order ClusterIP then Webserver
-  run_once: true
-  tags: [cluster, configuration]
 
