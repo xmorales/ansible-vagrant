@@ -64,6 +64,12 @@
   notify: reload nginx
   tags: [cluster, configuration]
 
+- name: Make sure nginx is running but not on startup
+  service: name=nginx
+           state=stopped
+           enabled=no
+  tags: [configuration, nginx]
+
 - name: Check stonith status
   shell: pcs property show stonith-enabled
   register: stonith_status
@@ -71,7 +77,7 @@
 
 - name: Disable stonith
   shell: pcs property set stonith-enabled=false
-  when: "'true' in stonith_status.stdout"
+  when: "'false' not in stonith_status.stdout"
   run_once: true
   tags: [cluster, configuration]
 
