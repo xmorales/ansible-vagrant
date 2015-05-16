@@ -4,7 +4,7 @@ httpd:
     server_name: &server_name 'wordpress.vagrant.dev'
     log_folder: '/var/log/httpd/website'
     config_file: '/etc/httpd/conf/httpd.conf'
-    status_url: 'http://localhost/httpd-status'
+    status_url: 'http://localhost/server-status'
     vip: '172.16.1.253'
 
 proxy:
@@ -13,7 +13,7 @@ proxy:
     ssl_certificate_key: 'vagrant.key'
     log_folder: '/var/log/nginx/proxy'
     config_file: '/etc/nginx/nginx.conf'
-    status_url: 'http://localhost/nginx-status'
+    status_url: 'http://localhost/server-status'
     upstream: 'webserver1.vagrant.dev'
     vip: '172.16.1.254'
 
