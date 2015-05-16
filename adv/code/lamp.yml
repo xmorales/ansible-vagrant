@@ -12,9 +12,16 @@
   gather_facts: yes
   vars_files:
     - vars/certs.yml
+  vars:
+    has_quorum: "{{ groups['proxy'] | check_quorum }}"
+    slaves: "{{ groups['proxy'] | get_slaves }}"
+    nodes: "{{ groups['proxy'] | nodes }}"
+    cluster_group: "{{ groups['proxy'] }}"
+    cluster_name: "proxy_cluster"
+    resource: "Proxyserver"
   roles:
-    - nginx
     - clustering
+    - nginx
 
 - hosts: web
   remote_user: vagrant
@@ -25,10 +32,14 @@
   vars:
     has_quorum: "{{ groups['web'] | check_quorum }}"
     slaves: "{{ groups['web'] | get_slaves }}"
+    nodes: "{{ groups['web'] | nodes }}"
+    cluster_group: "{{ groups['web'] }}"
+    cluster_name: "web_cluster"
+    resource: "Webserver"
   roles:
     - glusterfs
-    - httpd
     - clustering
+    - httpd
 
 - hosts: db
   remote_user: vagrant

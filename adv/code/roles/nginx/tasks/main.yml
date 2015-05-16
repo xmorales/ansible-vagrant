@@ -2,7 +2,7 @@
 - name: Place nginx repo
   copy: src=nginx.repo
         dest=/etc/yum.repos.d/
-  tags: base
+  tags: [deployment, nginx]
 
 - name: Install Nginx
   yum: name=nginx
@@ -10,7 +10,7 @@
       disablerepo=*
       enablerepo=nginx
       update_cache=yes
-  tags: deployment
+  tags: [deployment, nginx]
 
 - name: Make sure ssl folder exists
   file: path=/etc/nginx/ssl/
@@ -18,11 +18,11 @@
       recurse=yes
       owner=nginx
       group=nginx
-  tags: configuration
+  tags: [configuration, nginx]
 
 - name: Using shell to create log folder
   shell: mkdir -p "{{ proxy.log_folder }}"
-  tags: configuration
+  tags: [configuration, nginx]
 
 - name: Remove default config
   file: path=/etc/nginx/conf.d/{{ item }}
@@ -30,7 +30,7 @@
   with_items:
     - default.conf
     - default_ssl.conf
-  tags: configuration
+  tags: [configuration, nginx]
 
 - name: Copy certificates
   copy: content="{{ certs[item] }}"
@@ -40,14 +40,14 @@
   with_items:
     - vagrant.key
     - vagrant.crt
-  tags: configuration
+  tags: [configuration, nginx]
 
 - name: Copy main config
   template: src={{ item }}
             dest=/etc/nginx/
   with_items:
     - nginx.conf
-  tags: configuration
+  tags: [configuration, nginx]
 
 - name: Copy virtualhost template
   template: src={{ item }}
@@ -56,7 +56,62 @@
     - vagrant-proxy.conf
     - vg-upstream.conf
   notify: reload nginx
-  tags: configuration
+  tags: [configuration, nginx]
 
+- name: Copy server-status virtualhost
+  copy: src=monitor.conf
+        dest=/etc/nginx/conf.d/
+  notify: reload nginx
+  tags: [cluster, configuration]
+
+- name: Check stonith status
+  shell: pcs property show stonith-enabled
+  register: stonith_status
+  tags: [cluster, configuration]
+
+- name: Disable stonith
+  shell: pcs property set stonith-enabled=false
+  when: "'true' in stonith_status.stdout"
+  run_once: true
+  tags: [cluster, configuration]
+
+- name: Check if nginx is already a resource
+  shell: pcs resource
+  register: resources_result
+  tags: [cluster, configuration]
+
+- name: Set a VIP
+  shell: "pcs resource create ClusterIP ocf:heartbeat:IPaddr2 ip={{ proxy.vip }} cidr_netmask=32 op monitor interval=1min"
+  run_once: true
+  when: "'NO resources' in resources_result.stdout"
+  tags: [cluster, configuration]
+
+- name: Check resource defaults
+  shell: pcs resource defaults
+  register: resource_defaults
+  run_once: true
+  tags: [cluster, configuration]
+
+- name: Change defaults
+  shell: "pcs resource op defaults timeout=240s"
+  run_once: true
+  when: "'No defaults set' in resource_defaults.stdout"
+  tags: [cluster, configuration]
+
+- name: Activate nginx in clustering
+  shell: pcs resource create "{{ resource }}" ocf:heartbeat:nginx params configfile={{ proxy.config_file }} httpd=/usr/sbin/nginx op monitor interval=60s timeout=10s op start timeout=40s op stop timeout=60s
+  run_once: true
+  when: "resource not in resources_result.stdout"
+  tags: [cluster, configuration]
+
+- name: Ensure resources run on the same host
+  shell: pcs constraint colocation add {{ resource }} with ClusterIP INFINITY
+  run_once: true
+  tags: [cluster, configuration]
+
+- name: And resources run in order
+  shell: pcs constraint order ClusterIP then {{ resource }}
+  run_once: true
+  tags: [cluster, configuration]
 
 
