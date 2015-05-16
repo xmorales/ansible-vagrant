@@ -42,8 +42,8 @@
   tags: [configuration, httpd]
 
 - name: Copy server-status virtualhost
-  template: src=monitor.conf
-            dest=/etc/httpd/conf.d/
+  copy: src=monitor.conf
+        dest=/etc/httpd/conf.d/
   notify: reload httpd
   tags: [cluster, configuration]
 
@@ -64,9 +64,9 @@
   tags: [cluster, configuration]
 
 - name: Set a VIP
-  shell: "pcs resource create ClusterIP ocf:heartbeat:IPaddr2 ip={{ clustering.vip }} cidr_netmask=32 op monitor interval=1min"
+  shell: "pcs resource create ClusterIP ocf:heartbeat:IPaddr2 ip={{ httpd.vip }} cidr_netmask=32 op monitor interval=1min"
   run_once: true
-  when: "'No resources' in resources_result.stdout"
+  when: "'NO resources' in resources_result.stdout"
   tags: [cluster, configuration]
 
 - name: Check resource defaults
@@ -82,17 +82,19 @@
   tags: [cluster, configuration]
 
 - name: Activate httpd in clustering
-  shell: pcs resource create Webserver ocf:heartbeat:apache configfile={{ httpd.config_file }} statusurl="{{ httpd.status_url }}"
+  shell: pcs resource create {{ resource }} ocf:heartbeat:apache configfile={{ httpd.config_file }} statusurl="{{ httpd.status_url }}"
   run_once: true
-  when: "'No resources' in resources_result.stdout"
+  when: "resource not in resources_result.stdout"
   tags: [cluster, configuration]
 
 - name: Ensure resources run on the same host
-  shell: pcs constraint colocation add Webserver with ClusterIP INFINITY
+  shell: pcs constraint colocation add {{ resource }} with ClusterIP INFINITY
   run_once: true
   tags: [cluster, configuration]
 
 - name: And resources run in order
-  shell: pcs constraint order ClusterIP then Webserver
+  shell: pcs constraint order ClusterIP then {{ resource }}
   run_once: true
   tags: [cluster, configuration]
+
+
