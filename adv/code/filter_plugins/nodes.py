@@ -9,7 +9,7 @@ def nodes(groups):
 
 
 class FilterModule(object):
-    ''' A filter to skip first host in group '''
+    ''' A filter to get hosts by space sepparated '''
     def filters(self):
         return {
             'nodes': nodes,
