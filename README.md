@@ -200,14 +200,16 @@ Since this is for education purposes, `vagrant` is the master password for this 
 
 ## Clustering
 - [X] SSH passwordless among instances
-- [ ] httpd cluster
+- [X] httpd cluster
 - [ ] mysql cluster
-- [ ] dynamic pcs cluster auth
+- [X] dynamic pcs cluster auth
+- [X] nginx cluster
 
 
 # References:
 
 * [YAML reference](http://www.yaml.org/refcard.html)
+* [Stat module](http://docs.ansible.com/stat_module.html)
 * [Vagrant DNS plugin](https://github.com/phinze/landrush)
 * [Host shell plugin](https://github.com/phinze/vagrant-host-shell)
 * [Sublime Text 2/3 Ansible Language Pack](https://github.com/clifford-github/sublime-ansible)
