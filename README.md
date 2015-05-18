@@ -47,6 +47,7 @@ You can add as per more hosts you desire by modifying `hosts` array.
 
 ### Optional fields
 * disk: add an extra 500MB disk to the guest. 
+
 > You may face some bugs if the disk is already present and you `vagrant up` without using `--provison` flag.
 
 `inventory` hash will have inside its defined group in `hosts` array, appending each hostname accordingly into the group.
