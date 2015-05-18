@@ -50,6 +50,7 @@ You can add as per more hosts you desire by modifying `hosts` array.
 
 > You may face some bugs if the disk is already present and you `vagrant up` without using `--provison` flag.
 
+### Guest process
 `inventory` hash will have inside its defined group in `hosts` array, appending each hostname accordingly into the group.
 There's also a predefined `all` group keeping all hostnames.
 
