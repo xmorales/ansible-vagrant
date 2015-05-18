@@ -40,8 +40,8 @@ You can add as per more hosts you desire by modifying `hosts` array.
 
 ### Required fields
 * name: hostname of the guest
-# group: ansible group of the guest
-# forwards: ports to be forwarded to the guest. You can append more ports by comma separated
+* group: ansible group of the guest
+* forwards: ports to be forwarded to the guest. You can append more ports by comma separated
 * sshport: it's strongly recommended to choose those to prevent ssh issues to guests
 * ip: static ip of the guest
 
