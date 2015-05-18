@@ -34,6 +34,32 @@ LogLevel ERROR
 ```
 `$ vagrant up`
 
+# Vagrantfile
+## ADV setup
+You can add as per more hosts you desire by modifying `hosts` array. 
+
+### Required fields
+* name: hostname of the guest
+# group: ansible group of the guest
+# forwards: ports to be forwarded to the guest. You can append more ports by comma separated
+* sshport: it's strongly recommended to choose those to prevent ssh issues to guests
+* ip: static ip of the guest
+
+### Optional fields
+* disk: add an extra 500MB disk to the guest. 
+> You may face some bugs if the disk is already present and you `vagrant up` without using `--provison` flag.
+
+`inventory` hash will have inside its defined group in `hosts` array, appending each hostname accordingly into the group.
+There's also a predefined `all` group keeping all hostnames.
+
+Guest creation will take all variables defined in `hosts` and Virtualbox will start the process. I've just stated 500MB disk size for GlusterFS purposes which will run to Webservers allowing us storage clustering.
+
+Guest comes with minimum CentOS 6.5 and it will trigger `libselinux.sh` script after guest is booted. It will instal `libselinux-python` package due to SELinux is enabled as per default. This is because Ansible needs this installed on remote servers if you are attempting to use several Ansible modules.
+
+At the bottom of it, there's Ansible provisioning that will run playbooks just after the previous script. In this case, I find convenience connecting passwordless to servers. Find instructions inside `tools` directory.
+
+Finally, copying Ansible inventory to a more handy path.
+
 ## Pre-steps
 
 ### Deployment host
@@ -213,6 +239,7 @@ Since this is for education purposes, `vagrant` is the master password for this 
 * [Vagrant DNS plugin](https://github.com/phinze/landrush)
 * [Host shell plugin](https://github.com/phinze/vagrant-host-shell)
 * [Sublime Text 2/3 Ansible Language Pack](https://github.com/clifford-github/sublime-ansible)
+* [Ansible Provisioning](http://docs.vagrantup.com/v2/provisioning/ansible.html)
 * [Ansible Examples](https://github.com/ansible/ansible-examples)
 * [Ansible modules extra](https://github.com/ansible/ansible-modules-extras)
 * [Apache Rewrite Rules](http://thornelabs.net/2014/06/02/manage-apache-virtualhosts-and-mod-rewrite-rules-with-ansible.html)
