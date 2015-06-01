@@ -58,18 +58,25 @@ hosts = [
     :ip => "172.16.1.106",
   },
   {
-    :name => :database1,
-    :group => "db",
+    :name => :mgmt1,
+    :group => [ "db", "mgmt" ],
     :forwards => { 3306 => 3333 },
     :sshport => { 22 => 2215 },
     :ip => "172.16.1.110"
   },
   {
-    :name => :database2,
-    :group => "db",
+    :name => :datanode1,
+    :group => [ "db", "datanodes" ],
     :forwards => { 3306 => 3334 },
     :sshport => { 22 => 2216 },
     :ip => "172.16.1.111"
+  },
+  {
+    :name => :sqlnode1,
+    :group => [ "db", "sqlnodes" ],
+    :forwards => { 3306 => 3335 },
+    :sshport => { 22 => 2217 },
+    :ip => "172.16.1.112"
   }
 ]
 

@@ -1,0 +1,5 @@
+[mysql-local]
+name=Mysql cluster software local repository
+baseurl=file:///opt/mysql
+gpgcheck=0
+enabled=1
