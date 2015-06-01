@@ -1,23 +1,106 @@
 ---
-### https://github.com/ansible/ansible-examples/
-
-- name: Install Mysql package
-  yum: name={{ item }} state=present
-  with_items:
-   - mysql-server
-   - MySQL-python
-   - libsemanage-python
+- name: Download bundle on Webserver1
+  get_url: url={{ mysql.bundle }}
+           dest=/mnt/gluster/{{ mysql.bundle | split | last }}
+  delegate_to: webserver1
   tags: [deployment, mysql]
 
-- name: Configure SELinux to start mysql on any port
-  seboolean: name=mysql_connect_any state=true persistent=yes
+## on webserver1
+# cd /var/www/html/
+# sudo ln -s /mnt/gluster/MySQL-Cluster-gpl-7.4.6-1.el6.x86_64.rpm-bundle.tar latest-mysql-cluster
+
+- name: Create destination bundle path
+  file: path=/opt/mysql/
+        state=directory
   tags: [deployment, mysql]
 
-- name: Create Mysql configuration file
-  template: src=my.cnf dest=/etc/
-  notify: restart mysql
+- name: Download software to hosts
+  get_url: url=http://webserver1/latest-mysql-cluster
+           dest=/opt/mysql/{{ mysql.bundle | split | last }}
   tags: [deployment, mysql]
 
-- name: Start Mysql Service
-  service: name=mysqld state=started enabled=yes
+- name: Untar bundle
+  unarchive: copy=no
+             src=/opt/mysql/{{ mysql.bundle | split | last }}
+             dest=/opt/mysql/
   tags: [deployment, mysql]
+
+- name: Install createrepo
+  yum: name=createrepo
+       state=present
+  tags: [deployment, mysql]
+
+- name: Create local repository
+  command: createrepo /opt/mysql/
+  tags: [deployment, mysql]
+
+- name: Place local repository file
+  copy: src=mysql-local.repo
+        dest=/etc/yum.repos.d/
+  tags: [deployment, mysql]
+
+- name: Remove mysql-libs due to conflicts
+  yum: name=mysql-libs
+       state=absent
+  tags: [deployment, mysql]
+
+- name: Install software
+  yum: name={{ item }}
+       state=present
+       update_cache=yes
+  with_items: mysql.sw.common
+  tags: [deployment, mysql]
+
+- name: Install sql daemon on sql nodes
+  yum: name={{ item }}
+       state=present
+       update_cache=yes
+  when: groups['sqlnodes']
+  with_items: mysql.sw.client
+  tags: [deployment, mysql]
+
+- name: Copy my.cnf to datanodes and sqlnodes
+  template: src=my.cnf
+            dest=/etc/
+  when: ansible_hostname not in groups['mgmt'] and ansible_hostname in groups['db']
+  with_items: groups['mgmt']
+  tags: [configuration, mysql]
+
+- name: Create config dir on mgmt node
+  file: path=/var/lib/mysql-cluster/
+        state=directory
+  when: ansible_hostname in groups['mgmt']
+  tags: [configuration, mysql]
+
+- name: Make sure mysql data dir is there
+  file: path=/usr/local/mysql/data/
+        state=directory
+  tags: [configuration, mysql]
+
+- name: Copy config.ini to management node
+  template: src=config.ini
+            dest=/var/lib/mysql-cluster/
+  when: ansible_hostname in groups['mgmt']
+  tags: [configuration, mysql]
+
+- name: Start cluster on mgmt node
+  command: ndb_mgmd -f /var/lib/mysql-cluster/config.ini
+  when: ansible_hostname in groups['mgmt']
+  failed_when: false
+  tags: [configuration, mysql]
+
+- name: Check if datanodes are running
+  command: ndb_mgm -e "all status"
+  register: dnodes
+  tags: [configuration, mysql]
+
+- name: Start datanodes
+  command: ndbd
+  when: ansible_hostname in groups['datanodes'] and 'started' not in dnodes.stdout
+  failed_when: false
+  tags: [configuration, mysql]
+
+- name: Stop mysql on rest of nodes
+  service: name=mysql state=restarted
+  when: ansible_hostname in groups['sqlnodes']
+  tags: [configuration, mysql]

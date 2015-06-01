@@ -41,6 +41,13 @@ wp:
 
 mysql:
     port: '3306'
+    bundle: 'http://dev.mysql.com/get/Downloads/MySQL-Cluster-7.4/MySQL-Cluster-gpl-7.4.6-1.el6.x86_64.rpm-bundle.tar'
+    sw:
+        common:
+            - MySQL-Cluster-server-gpl
+            - MySQL-Cluster-shared-compat-gpl
+        client:
+            - MySQL-Cluster-client-gpl
 
 clustering:
     debug: 'on'
