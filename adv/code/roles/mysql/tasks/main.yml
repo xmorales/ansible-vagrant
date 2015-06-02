@@ -69,17 +69,20 @@
 - name: Create config dir on mgmt node
   file: path=/var/lib/mysql-cluster/
         state=directory
+        owner=mysql
   when: ansible_hostname in groups['mgmt']
   tags: [configuration, mysql]
 
 - name: Make sure mysql data dir is there
   file: path=/usr/local/mysql/data/
         state=directory
+        owner=mysql
   tags: [configuration, mysql]
 
 - name: Copy config.ini to management node
   template: src=config.ini
             dest=/var/lib/mysql-cluster/
+            owner=mysql
   when: ansible_hostname in groups['mgmt']
   tags: [configuration, mysql]
 
@@ -100,7 +103,7 @@
   failed_when: false
   tags: [configuration, mysql]
 
-- name: Stop mysql on rest of nodes
+- name: Start mysql on rest of nodes
   service: name=mysql state=restarted
   when: ansible_hostname in groups['sqlnodes']
   tags: [configuration, mysql]
