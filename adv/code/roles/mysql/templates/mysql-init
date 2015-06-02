@@ -1,0 +1,2 @@
+FLUSH PRIVILEGES;
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ cluster.auth_pwd }}');
