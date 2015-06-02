@@ -44,6 +44,8 @@
 - hosts: db
   remote_user: vagrant
   sudo: yes
+  vars_files:
+    - vars/certs.yml
   gather_facts: yes
   roles:
     - mysql

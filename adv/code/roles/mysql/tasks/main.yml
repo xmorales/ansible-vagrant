@@ -59,6 +59,18 @@
   with_items: mysql.sw.client
   tags: [deployment, mysql]
 
+- name: Make sure mysqld is stopped on sqlnodes
+  service: name=mysql state=stopped
+  when: ansible_hostname in groups['sqlnodes']
+  tags: [configuration, mysql]
+
+- name: Wait until mysql is stopped
+  wait_for: port=3306
+            delay=5
+            state=stopped
+  when: ansible_hostname in groups['sqlnodes']
+  tags: [configuration, mysql]
+
 - name: Copy my.cnf to datanodes and sqlnodes
   template: src=my.cnf
             dest=/etc/
@@ -103,7 +115,39 @@
   failed_when: false
   tags: [configuration, mysql]
 
-- name: Start mysql on rest of nodes
-  service: name=mysql state=restarted
+- name: Set root password to sqlnodes
+  template: src=mysql-init
+            dest=/usr/local/
+            owner=mysql
   when: ansible_hostname in groups['sqlnodes']
   tags: [configuration, mysql]
+
+- name: Start mysqld in safely 'hacky' mode
+  shell: "nohup mysqld_safe --skip-grant-tables > /dev/null 2>&1 &"
+  when: ansible_hostname in groups['sqlnodes']
+  register: mysql_safe
+  tags: [configuration, mysql]
+
+- name: Wait until mysql is started
+  wait_for: port=3306
+            delay=5
+  when: ansible_hostname in groups['sqlnodes']
+  tags: [configuration, mysql]
+
+- name: Flush privileges and set password
+  shell: "mysql -u root < /usr/local/mysql-init"
+  when: ansible_hostname in groups['sqlnodes']
+  register: init_file
+  tags: [configuration, mysql]
+
+- name: Restart mysql gracely
+  service: name=mysql state=restarted enabled=yes
+  when: ansible_hostname in groups['sqlnodes'] and mysql_safe.rc != 2
+  tags: [configuration, mysql]
+
+- name: Delete mysql-init file
+  file: path=/usr/local/mysql-init
+        state=absent
+  when: ansible_hostname in groups['sqlnodes'] and init_file.rc != 2
+  tags: [configuration, mysql]
+
