@@ -16,7 +16,6 @@ Tested with:
 ```
 $ git clone https://github.com/wefner/ansible-vagrant.git
 $ cd ansible-vagrant/
-$ vagrant plugin install landrush
 $ vagrant plugin install vagrant-host-shell
 $ vagrant box add chef/centos-6.5 --provider virtualbox
 ```
@@ -36,7 +35,7 @@ LogLevel ERROR
 
 # Vagrantfile
 ## ADV setup
-You can add as per more hosts you desire by modifying `hosts` array. 
+You can add as per more hosts you desire by modifying `hosts` array.
 
 ### Required fields
 * name: hostname of the guest
@@ -46,7 +45,7 @@ You can add as per more hosts you desire by modifying `hosts` array.
 * ip: static ip of the guest
 
 ### Optional fields
-* disk: add an extra 500MB disk to the guest. 
+* disk: add an extra 500MB disk to the guest.
 
 > You may face some bugs if the disk is already present and you `vagrant up` without using `--provison` flag.
 
@@ -229,9 +228,9 @@ Since this is for education purposes, `vagrant` is the master password for this 
 ## Clustering
 - [X] SSH passwordless among instances
 - [X] httpd cluster
-- [ ] mysql cluster
+- [X] mysql cluster
 - [X] dynamic pcs cluster auth
-- [X] nginx cluster
+- [ ] nginx cluster
 
 
 # References:
