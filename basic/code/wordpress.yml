@@ -1,4 +1,11 @@
 ---
+- hosts: all
+  remote_user: vagrant
+  sudo: yes
+  gather_facts: yes
+  roles:
+    - base
+
 - hosts: db
   remote_user: vagrant
   sudo: yes

@@ -6,21 +6,9 @@
         enablerepo=base
   with_items:
     - httpd
-    - MySQL-python
+    - php-mysql
+    - php-cgi
   tags: deployment
-
-# - name: Get wikimedia
-#   get_url: url=http://releases.wikimedia.org/mediawiki/1.24/mediawiki-{{ wiki_version }}.tar.gz
-#            dest=/var/www/html/
-#   tags: deployment
-
-# - name: Get wikimedia
-#   # shell: cd /var/www/html/; mkdir wiki; curl {{ wiki_path }} | tar xvz --directory=wiki/
-#   command: chdir=/var/www/html/ /bin/tar xvf mediawiki-{{ wiki_version }}.tar.gz
-#             creates=/var/www/html/wiki
-#   register: wiki_result
-#   failed_when: wiki_result.rc != 0
-#   tags: deployment
 
 - name: Download WordPress
   get_url: url=http://wordpress.org/wordpress-{{ wp_version }}.tar.gz dest=/srv/wordpress-{{ wp_version }}.tar.gz
@@ -41,17 +29,17 @@
   sudo: no
 
 - name: Create WordPress database
-  delegate_to: database1.vagrant.dev
+  delegate_to: db
   mysql_db: name={{ wp_db_name }} state=present
   tags: mysql
 
 - name: Create WordPress database user
-  delegate_to: database1.vagrant.dev
+  delegate_to: db
   tags: mysql
   mysql_user: name={{ wp_db_user }}
               password={{ wp_db_password }}
               priv={{ wp_db_name }}.*:ALL
-              host='webserver1.vagrant.dev'
+              host="web"
               state=present
 
 - name: Copy WordPress config file
