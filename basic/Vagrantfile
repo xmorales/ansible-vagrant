@@ -13,6 +13,7 @@ config.vm.graceful_halt_timeout = 10
 
 config.vm.box = "chef/centos-6.5"
 config.vm.provision :shell, path: "libselinux.sh"
+config.vm.synced_folder ".", "/vagrant", disabled: true
 
 config.vm.provision "ansible" do |ansible|
   ansible.playbook = "code/tools/pubkeys.yml"

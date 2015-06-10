@@ -22,6 +22,7 @@
 
 - name: Using shell to create log folder
   shell: mkdir -p "{{ log_folder }}"
+  changed_when: false
   tags: configuration
 
 - name: Remove default config
